@@ -1,0 +1,28 @@
+{
+    "name": "aphly/laravel-payment",
+    "description": "payment for laravel",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Aphly\\LaravelPayment\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Aphly",
+            "email": "121099327@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.0",
+        "aphly/laravel": ">=1.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+		        "Aphly\\LaravelPayment\\PaymentServiceProvider"
+            ]
+        }
+    }
+}
