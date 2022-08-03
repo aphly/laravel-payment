@@ -7,6 +7,7 @@ use Aphly\Laravel\Libs\Helper;
 use Aphly\Laravel\Mail\MailSend;
 use Aphly\LaravelPayment\Controllers\Controller;
 
+use Aphly\LaravelPayment\Services\Paypal\Client;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,9 @@ class PaypalController extends Controller
 
     public function index()
     {
+        $client = new Client;
+        $token = $client->token();
+        dd($token);
         $order = new Order;
         $purchaseUnits = [
             [
