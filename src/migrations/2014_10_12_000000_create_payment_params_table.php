@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('payment_setting', function (Blueprint $table) {
+        Schema::create('payment_method_params', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('payment_id')->index();
+            $table->unsignedBigInteger('method_id')->index();
             $table->string('key',32);
             $table->string('val',255)->nullable();
             $table->timestamps();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payment_setting');
+        Schema::dropIfExists('payment_method_params');
     }
 };

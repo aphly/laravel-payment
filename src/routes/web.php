@@ -15,20 +15,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web'])->group(function () {
 
+
     Route::prefix('payment')->group(function () {
-        Route::get('paypal/pay', 'Aphly\LaravelPayment\Controllers\Front\PaypalController@index');
+        Route::get('form', 'Aphly\LaravelPayment\Controllers\Front\PayController@form');
 
-        Route::get('paypal-form', 'Payment\PayPalController@payPalShow');
-        Route::post('paypal-pay', 'Payment\PayPalController@pay');
-        Route::post('paypal-notify', 'Payment\PayPalController@payPalNotify');
-        Route::get('paypal-return', 'Payment\PayPalController@payPalReturn');
-        Route::get('paypal-cancel', 'Payment\PayPalController@payPalCancel');
+        Route::post('order', 'Aphly\LaravelPayment\Controllers\Front\PayController@order');
+        Route::post('notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
+        Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PayController@return');
     });
-
 });
 
 Route::get('/test', function (){
-
+    $price = number_format(floatval(1.02551),2);
+    dd($price);
 });
 
 
@@ -41,7 +40,7 @@ Route::middleware(['web'])->group(function () {
             Route::post('/method/install', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@del');
 
             $route_arr = [
-                ['method','\MethodController'],['setting','\SettingController']
+                ['method','\MethodController']
             ];
             foreach ($route_arr as $val){
                 Route::get('/'.$val[0].'/index', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@index');
@@ -49,6 +48,11 @@ Route::middleware(['web'])->group(function () {
                 Route::post('/'.$val[0].'/save', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@save');
                 Route::post('/'.$val[0].'/del', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@del');
             }
+
+            Route::get('/method_params/index', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsIndex');
+            Route::get('/method_params/form', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsForm');
+            Route::post('/method_params/save', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsSave');
+            Route::post('/method_params/del', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsDel');
 
         });
     });

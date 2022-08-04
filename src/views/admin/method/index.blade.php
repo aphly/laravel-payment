@@ -37,6 +37,7 @@
                         </li>
                         <li>
                             <a class="badge badge-info ajax_get" data-href="/payment_admin/method/form?id={{$v['id']}}">编辑</a>
+                            <a class="badge badge-info ajax_get" data-href="/payment_admin/method/params?id={{$v['id']}}">编辑</a>
                         </li>
                     </ul>
                     @endforeach

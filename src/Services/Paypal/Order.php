@@ -10,6 +10,15 @@ class Order
         $this->client = (new Client)->make();
     }
 
+    public function getLinkByRel($links,string $rel) {
+        foreach ($links as $val){
+            if($val['rel']==$rel){
+                return $val['href'];
+            }
+        }
+        return '';
+    }
+
     public function create(
         array $purchaseUnits,
         string $intent = 'CAPTURE',
@@ -20,7 +29,8 @@ class Order
             'purchase_units' => $purchaseUnits,
             'application_context' => $applicationContext,
         ]));
-        return $response;
+        $res_arr = $response->json();
+        return $this->getLinkByRel($res_arr['links'],'approve');
     }
 
     public function show(string $orderId) {

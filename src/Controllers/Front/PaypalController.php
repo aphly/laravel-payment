@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use function config;
 use function redirect;
@@ -21,29 +22,36 @@ use Aphly\LaravelPayment\Services\Paypal\Order;
 class PaypalController extends Controller
 {
 
-    public function index()
+    public function order($request)
     {
-        $client = new Client;
-        $token = $client->token();
-        dd($token);
         $order = new Order;
-        $purchaseUnits = [
-            [
-                'amount' => [
-                    'currency_code' => 'GBP',
-                    'value' => 12.50,
+        $price = number_format(floatval($request->input('price',0)),2);
+        if($price){
+            $purchaseUnits = [
+                [
+                    'amount' => [
+                        'currency_code' => 'USD',
+                        'value' => $price,
+                    ],
                 ],
-            ],
-        ];
-        $applicationContext = [
-            'brand_name' => 'My Online Shop',
-            'shipping_preference' => 'NO_SHIPPING',
-            'user_action' => 'PAY_NOW',
-            'return_url' => 'https://localhost/return',
-            'cancel_url' => 'https://localhost/cancel',
-        ];
-        $paypalOrder = $order->create($purchaseUnits, 'CAPTURE', $applicationContext);
-        dd($paypalOrder);
+            ];
+            $applicationContext = [
+                'brand_name' => env('APP_NAME'),
+                'shipping_preference' => 'NO_SHIPPING',
+                'user_action' => 'PAY_NOW',
+                'return_url' => 'http://test2.com/return',
+                'cancel_url' => 'http://test2.com/cancel',
+            ];
+            $pay_url = $order->create($purchaseUnits, 'CAPTURE', $applicationContext);
+            return redirect($pay_url);
+        }
+
+    }
+
+    public function return($request)
+    {
+        $res['title'] = 'Payment return';
+        return $this->makeView('laravel-payment::front.payment.return',['res'=>$res]);
     }
 
 

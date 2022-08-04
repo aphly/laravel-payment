@@ -6,37 +6,34 @@
 </style>
 <div class="imain">
     <div class="itop ">
-        <form method="get" action="/payment_admin/setting/index" class="select_form">
-        <div class="filter ">
-            <input type="search" name="name" placeholder="setting name" value="{{$res['filter']['name']}}">
-            <button class="" type="submit">搜索</button>
+        <div>
+            {{$res['method_info']->name}}
         </div>
-        </form>
         <div class="">
-            <a class="badge badge-primary ajax_get show_all0_btn" data-href="/payment_admin/setting/form">添加</a>
+            <a class="badge badge-primary ajax_get show_all0_btn" data-href="/payment_admin/method_params/form?method_id={{$res['method_id']}}">添加</a>
         </div>
     </div>
 
-    <form method="post"  @if($res['filter']['string']) action="/payment_admin/setting/del?{{$res['filter']['string']}}" @else action="/payment_admin/setting/del" @endif  class="del_form">
+    <form method="post"  action="/payment_admin/method_params/del?method_id={{$res['method_id']}}"  class="del_form">
     @csrf
         <div class="table_scroll">
             <div class="table">
                 <ul class="table_header">
                     <li >ID</li>
-                    <li >setting name</li>
-                    <li >sort</li>
+                    <li >key</li>
+                    <li >val</li>
                     <li >操作</li>
                 </ul>
                 @if($res['list']->total())
                     @foreach($res['list'] as $v)
                     <ul class="table_tbody">
                         <li><input type="checkbox" class="delete_box" name="delete[]" value="{{$v['id']}}">{{$v['id']}}</li>
-                        <li>{{ $v['name'] }}</li>
+                        <li>{{ $v['key'] }}</li>
                         <li>
-                            {{$v->sort}}
+                            {{ $v['val'] }}
                         </li>
                         <li>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/setting/form?id={{$v['id']}}">编辑</a>
+                            <a class="badge badge-info ajax_get" data-href="/payment_admin/method_params/form?method_id={{$res['method_id']}}&id={{$v['id']}}">编辑</a>
                         </li>
                     </ul>
                     @endforeach
