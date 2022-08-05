@@ -15,11 +15,12 @@ class PaypalController extends Controller
     {
         $order = new Order;
         $amount = number_format(floatval($data['amount']),2);
+        $data['currency_code'] = $data['currency_code']??'USD';
         if($amount){
             $purchaseUnits = [
                 [
                     'amount' => [
-                        'currency_code' => 'USD',
+                        'currency_code' => $data['currency_code'],
                         'value' => $amount,
                     ],
                 ],
@@ -39,28 +40,12 @@ class PaypalController extends Controller
         }
     }
 
-    public function return($request)
+    public function return($payment)
     {
-        $payment_id = session()->get('paypal_payment_id');
-        if (empty($request->query('PayerID')) || empty($request->queryget('token'))) {
-            return redirect()->route('paypal-form');
-        }
-
-        $payment = Payment::get($payment_id, $this->_api_context);
-
-        $execution = new PaymentExecution();
-
-        $execution->setPayerId(Input::get('PayerID'));
-
-        $result = $payment->execute($execution, $this->_api_context);
-
-        if ($result->getState() == 'approved') {
-            session()->put('success','Payment success');
-            return redirect()->route('paypal-form');
-
-        }
-        session()->put('error','Payment failed');
-        return redirect()->route('paypal-form');
+        $order = new Order;
+        $info = $order->capture($payment->transaction_id);
+        //$info = $order->show($payment->transaction_id);
+        dd($info);
     }
 
 

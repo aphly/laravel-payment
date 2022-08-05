@@ -35,12 +35,13 @@ class Order
 
     public function show(string $orderId) {
         $response = $this->client->get('checkout/orders/' . $orderId);
-        return $response;
+        return $response->json();
     }
 
-    public function show1(string $captureId){
-        $capture = $this->client->get('payments/captures/' . $captureId);
-        return $capture;
+    public function capture(string $orderId){
+        $response = $this->client->post('checkout/orders/' . $orderId.'/capture');
+        dd($response);
+        return $response->json();
     }
 
     public function refund(string $captureId, float $amount, string $currency = 'GBP', string $reason = '', string $invoiceId = ''){

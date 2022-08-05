@@ -26,7 +26,7 @@ class PayController extends Controller
 
     public function notify(Request $request)
     {
-        $payment = Payment::where('transaction_id',$request->query('transaction_id'))->first();
+        $payment = Payment::where('transaction_id',$request->input('PayerID'))->first();
         if(!empty($payment) && $payment->status==1 && $payment->notify_func){
             list($class,$func) = explode('@',$payment->notify_func);
             if (class_exists($class) && method_exists($class,$func)){
@@ -38,27 +38,25 @@ class PayController extends Controller
 
     public function return(Request $request)
     {
-        $method_id = $request->input('method_id',1);
-        $method = Method::where('id',$method_id)->where('status',1)->first();
-        if(!empty($method)){
-            $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
-            if (class_exists($class)) {
-                (new $class)->return($request);
+        //payment/return?token=7U168763NS774425V&PayerID=5JBR62CD2ZXS4
+        $payment = Payment::where('transaction_id',$request->query('token'))->first();
+        if(!empty($payment)){
+            $method = Method::where('id',$payment->method_id)->where('status',1)->first();
+            if(!empty($method)){
+                $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
+                if (class_exists($class)) {
+                    (new $class)->return($payment);
+                }
             }
         }
-    }
-
-    public function t1($payment)
-    {
-        return 'xxxx_'.$payment->amount;
     }
 
     public function form(Request $request)
     {
         $data['method_id'] = 1;
-        $data['amount'] = 10.51;
-        $data['return_url'] = '';
-        $data['cancel_url'] = '';
+        $data['amount'] = 12.22;
+        $data['return_url'] = 'http://test2.com/payment/return';
+        $data['cancel_url'] = 'http://test2.com/payment/cancel_url';
         $data['notify_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t1';
         $this->pay($data);
     }

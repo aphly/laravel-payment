@@ -13,13 +13,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
-Route::get('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
         Route::get('form', 'Aphly\LaravelPayment\Controllers\Front\PayController@form');
         Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PayController@return');
     });
+});
+
+Route::post('/v2/checkout/orders/{id}/capture', function (\Illuminate\Http\Request $request){
+    dd($request->id);
 });
 
 Route::get('/test', function (){

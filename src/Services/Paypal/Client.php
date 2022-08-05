@@ -9,6 +9,7 @@ class Client
 {
     const VERSION = '/v2/';
     const SANDBOX_URL = 'https://api-m.sandbox.paypal.com';
+
     const LIVE_URL = 'https://api-m.paypal.com';
 
     public $environment = '';
@@ -31,7 +32,8 @@ class Client
     public function make(){
         return Http::withToken($this->token())
             ->asJson()
-            ->baseUrl($this->generateBaseUrl());
+            //->baseUrl($this->generateBaseUrl());
+            ->baseUrl('http://test2.com/v2');
     }
 
 }
