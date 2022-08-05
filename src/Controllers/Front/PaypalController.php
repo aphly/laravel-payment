@@ -3,35 +3,24 @@
 namespace Aphly\LaravelPayment\Controllers\Front;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\Laravel\Libs\Helper;
-use Aphly\Laravel\Mail\MailSend;
 use Aphly\LaravelPayment\Controllers\Controller;
+use Aphly\LaravelPayment\Models\Payment;
 
-use Aphly\LaravelPayment\Services\Paypal\Client;
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-use function config;
-use function redirect;
 use Aphly\LaravelPayment\Services\Paypal\Order;
 
 class PaypalController extends Controller
 {
 
-    public function order($request)
+    public function pay($data)
     {
         $order = new Order;
-        $price = number_format(floatval($request->input('price',0)),2);
-        if($price){
+        $amount = number_format(floatval($data['amount']),2);
+        if($amount){
             $purchaseUnits = [
                 [
                     'amount' => [
                         'currency_code' => 'USD',
-                        'value' => $price,
+                        'value' => $amount,
                     ],
                 ],
             ];
@@ -39,19 +28,39 @@ class PaypalController extends Controller
                 'brand_name' => env('APP_NAME'),
                 'shipping_preference' => 'NO_SHIPPING',
                 'user_action' => 'PAY_NOW',
-                'return_url' => 'http://test2.com/return',
-                'cancel_url' => 'http://test2.com/cancel',
+                'return_url' => $data['return_url'],
+                'cancel_url' => $data['cancel_url'],
             ];
-            $pay_url = $order->create($purchaseUnits, 'CAPTURE', $applicationContext);
-            return redirect($pay_url);
+            $res_arr = $order->create($purchaseUnits, 'CAPTURE', $applicationContext);
+            $pay_url = $order->getLinkByRel($res_arr['links'],'approve');
+            $data['transaction_id'] = $res_arr['id'];
+            Payment::create($data);
+            redirect($pay_url)->send();
         }
-
     }
 
     public function return($request)
     {
-        $res['title'] = 'Payment return';
-        return $this->makeView('laravel-payment::front.payment.return',['res'=>$res]);
+        $payment_id = session()->get('paypal_payment_id');
+        if (empty($request->query('PayerID')) || empty($request->queryget('token'))) {
+            return redirect()->route('paypal-form');
+        }
+
+        $payment = Payment::get($payment_id, $this->_api_context);
+
+        $execution = new PaymentExecution();
+
+        $execution->setPayerId(Input::get('PayerID'));
+
+        $result = $payment->execute($execution, $this->_api_context);
+
+        if ($result->getState() == 'approved') {
+            session()->put('success','Payment success');
+            return redirect()->route('paypal-form');
+
+        }
+        session()->put('error','Payment failed');
+        return redirect()->route('paypal-form');
     }
 
 

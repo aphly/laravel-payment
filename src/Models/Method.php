@@ -18,7 +18,7 @@ class Method extends Model
     ];
 
     public function findAll() {
-        return Cache::rememberForever('group', function () {
+        return Cache::rememberForever('payment_method', function () {
             return self::get()->keyBy('id')->toArray();
         });
     }

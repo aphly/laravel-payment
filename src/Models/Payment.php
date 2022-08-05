@@ -6,19 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
 use Illuminate\Support\Facades\Cache;
 
-class MethodParams extends Model
+class Payment extends Model
 {
     use HasFactory;
-    protected $table = 'payment_method_params';
+    protected $table = 'payment';
     protected $primaryKey = 'id';
-
+    //public $timestamps = false;
 
     protected $fillable = [
-        'key','val','method_id'
+        'method_id','transaction_id','status','amount','notify_func'
     ];
 
     public function findAll() {
-        return Cache::rememberForever('payment_method_params', function () {
+        return Cache::rememberForever('payment', function () {
             return self::get()->keyBy('id')->toArray();
         });
     }

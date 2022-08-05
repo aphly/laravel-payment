@@ -10,11 +10,11 @@
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-info">
-                <label for="">sort</label>
-                <input type="number" name="sort" class="form-control " value="10">
+                <label for="">price</label>
+                <input type="number" name="price" class="form-control " value="10.12">
                 <div class="invalid-feedback"></div>
             </div>
-            <button class="btn btn-primary" type="submit">保存</button>
+            <button class="btn btn-primary" type="submit">send</button>
         </div>
     </form>
 </div>

@@ -29,8 +29,8 @@ class Order
             'purchase_units' => $purchaseUnits,
             'application_context' => $applicationContext,
         ]));
-        $res_arr = $response->json();
-        return $this->getLinkByRel($res_arr['links'],'approve');
+        return $response->json();
+
     }
 
     public function show(string $orderId) {

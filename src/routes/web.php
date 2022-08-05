@@ -12,22 +12,18 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
+Route::get('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
 
 Route::middleware(['web'])->group(function () {
-
-
     Route::prefix('payment')->group(function () {
         Route::get('form', 'Aphly\LaravelPayment\Controllers\Front\PayController@form');
-
-        Route::post('order', 'Aphly\LaravelPayment\Controllers\Front\PayController@order');
-        Route::post('notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
         Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PayController@return');
     });
 });
 
 Route::get('/test', function (){
-    $price = number_format(floatval(1.02551),2);
-    dd($price);
+
 });
 
 

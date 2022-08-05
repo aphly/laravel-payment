@@ -17,7 +17,9 @@ return new class extends Migration
             $table->id();
             $table->integer('method_id')->index();
             $table->string('transaction_id',128)->index();
+            $table->string('notify_func',255);
             $table->tinyInteger('status')->nullable()->default(1);
+            $table->decimal('amount',10,2);
             $table->timestamps();
         });
     }
