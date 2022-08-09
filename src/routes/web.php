@@ -1,5 +1,8 @@
 <?php
 
+use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\LaravelPayment\Models\Payment;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,17 +21,14 @@ Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
         Route::get('form', 'Aphly\LaravelPayment\Controllers\Front\PayController@form');
         Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PayController@return');
+        Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PayController@show');
     });
 });
+Route::middleware(['web'])->group(function () {
+    Route::get('test', function (){
 
-Route::post('/v2/checkout/orders/{id}/capture', function (\Illuminate\Http\Request $request){
-    dd($request->id);
+    });
 });
-
-Route::get('/test', function (){
-
-});
-
 
 Route::middleware(['web'])->group(function () {
 

@@ -7,12 +7,19 @@ use Aphly\LaravelPayment\Controllers\Controller;
 use Aphly\LaravelPayment\Models\Method;
 use Aphly\LaravelPayment\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PayController extends Controller
 {
+    public $log;
 
+    function __construct(){
+        parent::__construct();
+        $this->log = Log::channel('payment');
+    }
     public function pay($data)
     {
+        $this->log->debug('payment_pay start');
         $method = Method::where('id',$data['method_id'])->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
@@ -20,44 +27,68 @@ class PayController extends Controller
                 (new $class)->pay($data);
             }
         }else{
-            throw new ApiException(['code'=>1,'msg'=>'fail']);
+            throw new ApiException(['code'=>1,'msg'=>'payment method error']);
         }
     }
 
-    public function notify(Request $request)
+    public function refer()
     {
-        $payment = Payment::where('transaction_id',$request->input('PayerID'))->first();
-        if(!empty($payment) && $payment->status==1 && $payment->notify_func){
-            list($class,$func) = explode('@',$payment->notify_func);
-            if (class_exists($class) && method_exists($class,$func)){
-                return (new $class)->{$func}($payment);
+        if(isset($_SERVER['HTTP_REFERER'])) {
+            $method_id = 1;
+        }else{
+            $method_id = 0;
+        }
+        return $method_id=1;
+    }
+
+    public function notify()
+    {
+        $this->log->debug('payment_notify start');
+        $method_id = $this->refer();
+        $method = Method::where('id',$method_id)->where('status',1)->first();
+        if(!empty($method)){
+            $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
+            if (class_exists($class)) {
+                (new $class)->notify($method->id);
             }
         }
-        return 'fail';
     }
 
-    public function return(Request $request)
+    public function return()
     {
-        //payment/return?token=7U168763NS774425V&PayerID=5JBR62CD2ZXS4
-        $payment = Payment::where('transaction_id',$request->query('token'))->first();
+        $this->log->debug('payment_return start');
+        $method_id = $this->refer();
+        $method = Method::where('id',$method_id)->where('status',1)->first();
+        if(!empty($method)){
+            $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
+            if (class_exists($class)) {
+                (new $class)->return($method->id);
+            }
+        }
+    }
+
+    public function show(Request $request)
+    {
+        $payment = Payment::where(['id'=>$request->query('payment_id')])->first();
         if(!empty($payment)){
             $method = Method::where('id',$payment->method_id)->where('status',1)->first();
             if(!empty($method)){
                 $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
                 if (class_exists($class)) {
-                    (new $class)->return($payment);
+                    (new $class)->show($payment);
                 }
             }
         }
     }
 
-    public function form(Request $request)
+    public function form()
     {
         $data['method_id'] = 1;
-        $data['amount'] = 12.22;
-        $data['return_url'] = 'http://test2.com/payment/return';
+        $data['amount'] = 10.00;
         $data['cancel_url'] = 'http://test2.com/payment/cancel_url';
         $data['notify_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t1';
+        $data['success_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t2';
+        $data['fail_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t3';
         $this->pay($data);
     }
 }

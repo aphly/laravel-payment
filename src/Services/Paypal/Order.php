@@ -7,7 +7,7 @@ class Order
     public $client;
 
     function __construct(){
-        $this->client = (new Client)->make();
+        $this->client = new Client;
     }
 
     public function getLinkByRel($links,string $rel) {
@@ -24,28 +24,26 @@ class Order
         string $intent = 'CAPTURE',
         array $applicationContext = []
     ){
-        $response = $this->client->post('checkout/orders', array_filter([
+        $response = $this->client->http('checkout/orders','post', array_filter([
             'intent' => $intent,
             'purchase_units' => $purchaseUnits,
             'application_context' => $applicationContext,
         ]));
         return $response->json();
-
     }
 
     public function show(string $orderId) {
-        $response = $this->client->get('checkout/orders/' . $orderId);
+        $response = $this->client->http('checkout/orders/' . $orderId);
         return $response->json();
     }
 
     public function capture(string $orderId){
-        $response = $this->client->post('checkout/orders/' . $orderId.'/capture');
-        dd($response);
+        $response = $this->client->http('checkout/orders/' . $orderId.'/capture','post');
         return $response->json();
     }
 
     public function refund(string $captureId, float $amount, string $currency = 'GBP', string $reason = '', string $invoiceId = ''){
-        $capture = $this->client->post('payments/captures/' . $captureId . '/refund', array_filter([
+        $response = $this->client->http('payments/captures/' . $captureId . '/refund','post', array_filter([
             'amount' => [
                 'value' => $amount,
                 'currency_code' => $currency,
@@ -53,6 +51,6 @@ class Order
             'note_to_payer' => $reason,
             'invoice_id' => $invoiceId,
         ]));
-        return $capture;
+        return $response->json();
     }
 }

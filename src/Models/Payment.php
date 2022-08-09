@@ -14,7 +14,7 @@ class Payment extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'method_id','transaction_id','status','amount','notify_func'
+        'method_id','transaction_id','status','amount','notify_func','success_func','fail_func','currency_code'
     ];
 
     public function findAll() {

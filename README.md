@@ -10,4 +10,11 @@ mysql5.7+<br>
 `php artisan vendor:publish --provider="Aphly\LaravelPayment\PaymentServiceProvider"` <br>
 `php artisan migrate` <br>
 
-
+config/logging.php<br>
+channels 中添加
+`'payment' => [
+'driver' => 'daily',
+'path' => storage_path('logs/payment.log'),
+'level' => env('LOG_LEVEL', 'debug'),
+'days' => 30,
+],`
