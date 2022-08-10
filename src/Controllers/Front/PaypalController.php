@@ -59,6 +59,17 @@ class PaypalController extends Controller
         }
     }
 
+    public function callBack($func,$payment)
+    {
+        if($func && $payment){
+            list($class,$func) = explode('@',$func);
+            if (class_exists($class) && method_exists($class,$func)){
+                return (new $class)->{$func}($payment);
+            }
+        }
+        throw new ApiException(['code'=>2,'msg'=>'payment callBack fail']);
+    }
+
     public function return($method_id)
     {
         //payment/return?token=7U168763NS774425V&PayerID=5JBR62CD2ZXS4
@@ -70,19 +81,20 @@ class PaypalController extends Controller
                 $this->log->debug('payment_paypal return start',$request->all());
                 $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
                 if(!empty($payment)){
-                    $info = $this->order->show($order_id);
-                    $this->log->debug('payment_paypal return ',$info);
-                    if($info['status']=='COMPLETED'){
-                        if($payment->success_func){
-                            list($class,$func) = explode('@',$payment->success_func);
-                            if (class_exists($class) && method_exists($class,$func)){
-                                return (new $class)->{$func}($payment);
-                            }
-                        }
-                        throw new ApiException(['code'=>3,'msg'=>'payment COMPLETED']);
-                    }else if($info['status']=='APPROVED' && $payment->status==1){
+                    if($payment->status==1){
                         $capture = $this->order->capture($order_id);
                         $this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
+                        if($capture){
+                            $payment->status=2;
+                            if($payment->save() && $payment->notify_func){
+                                list($class,$func) = explode('@',$payment->notify_func);
+                                if (class_exists($class) && method_exists($class,$func)){
+                                    $this->log->debug('payment_paypal notify func capture');
+                                    (new $class)->{$func}($payment);
+                                }
+                                return $this->callBack($payment->success_func,$payment);
+                            }
+                        }
                         if($payment->success_func){
                             list($class,$func) = explode('@',$payment->success_func);
                             if (class_exists($class) && method_exists($class,$func)){
@@ -91,15 +103,10 @@ class PaypalController extends Controller
                             }
                         }
                         throw new ApiException(['code'=>0,'msg'=>'payment success']);
+                    }else if($payment->status>1){
+                        return $this->callBack($payment->success_func,$payment);
                     }else{
-                        if($payment->fail_func){
-                            list($class,$func) = explode('@',$payment->fail_func);
-                            if (class_exists($class) && method_exists($class,$func)){
-                                $this->log->debug('payment_paypal return fail_func');
-                                return (new $class)->{$func}($payment);
-                            }
-                        }
-                        throw new ApiException(['code'=>2,'msg'=>'fail_func null']);
+                        return $this->callBack($payment->fail_func,$payment);
                     }
                 }else{
                     throw new ApiException(['code'=>1,'msg'=>'fail']);
@@ -114,31 +121,40 @@ class PaypalController extends Controller
 
     public function notify($method_id)
     {
-        $input = request()->all();
-        $this->log->debug('payment_paypal notify start',$input);
-        $order_id = $input['resource']['supplementary_data']['related_ids']['order_id'];
-        $invoice_id = $input['resource']['invoice_id'];
-        $payment = Payment::where(['transaction_id'=>$order_id,'id'=>$invoice_id])->first();
-        if(!empty($payment)){
-            if($payment->status!=1){
-                throw new ApiException('');
+        //$input = request()->all();
+        $raw_post_data = file_get_contents('php://input');
+        if($raw_post_data){
+            $input = json_decode($raw_post_data,true);
+            if(!$input){
+                throw new ApiException(['code'=>-2,'msg'=>'fail']);
             }
-            $info = $this->order->show($order_id);
-            if($info['status']=='COMPLETED'){
-                $payment->status=2;
-                if($payment->save() && $payment->notify_func){
-                    list($class,$func) = explode('@',$payment->notify_func);
-                    if (class_exists($class) && method_exists($class,$func)){
-                        $this->log->debug('payment_paypal notify func');
-                        (new $class)->{$func}($payment);
-                    }
+            $this->log->debug('payment_paypal notify start',$input);
+            $order_id = $input['resource']['supplementary_data']['related_ids']['order_id'];
+            $invoice_id = $input['resource']['invoice_id'];
+            $payment = Payment::where(['transaction_id'=>$order_id,'id'=>$invoice_id])->first();
+            if(!empty($payment)){
+                if($payment->status!=1){
+                    throw new ApiException('');
                 }
-                throw new ApiException('');
+                $info = $this->order->show($order_id);
+                if($info['status']=='COMPLETED'){
+                    $payment->status=2;
+                    if($payment->save() && $payment->notify_func){
+                        list($class,$func) = explode('@',$payment->notify_func);
+                        if (class_exists($class) && method_exists($class,$func)){
+                            $this->log->debug('payment_paypal notify func');
+                            (new $class)->{$func}($payment);
+                        }
+                    }
+                    throw new ApiException('');
+                }else{
+                    throw new ApiException(['code'=>2,'msg'=>'fail']);
+                }
             }else{
-                throw new ApiException(['code'=>2,'msg'=>'fail']);
+                throw new ApiException(['code'=>1,'msg'=>'fail']);
             }
         }else{
-            throw new ApiException(['code'=>1,'msg'=>'fail']);
+            throw new ApiException(['code'=>-1,'msg'=>'fail']);
         }
     }
 
