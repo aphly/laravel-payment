@@ -24,10 +24,14 @@ Route::middleware(['web'])->group(function () {
         Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PayController@show');
     });
 });
-Route::middleware(['web'])->group(function () {
-    Route::get('test', function (){
 
-    });
+Route::get('test', function (){
+    var_dump(request()->header('referer'));
+});
+
+Route::post('test', function (){
+    echo 'xxx';
+    var_dump(request()->header('referer'));
 });
 
 Route::middleware(['web'])->group(function () {

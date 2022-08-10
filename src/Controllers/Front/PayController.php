@@ -33,19 +33,20 @@ class PayController extends Controller
 
     public function refer()
     {
-        if(isset($_SERVER['HTTP_REFERER'])) {
-            $method_id = 1;
-        }else{
-            $method_id = 0;
-        }
-        return $method_id=1;
+        $method_name = 'paypal';
+//        if(isset($_SERVER['HTTP_REFERER'])) {
+//            $method_name = 1;
+//        }else{
+//            $method_name = 0;
+//        }
+        return $method_name;
     }
 
     public function notify()
     {
         $this->log->debug('payment_notify start');
-        $method_id = $this->refer();
-        $method = Method::where('id',$method_id)->where('status',1)->first();
+        $method_name = $this->refer();
+        $method = Method::where('name',$method_name)->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
             if (class_exists($class)) {
@@ -57,8 +58,8 @@ class PayController extends Controller
     public function return()
     {
         $this->log->debug('payment_return start');
-        $method_id = $this->refer();
-        $method = Method::where('id',$method_id)->where('status',1)->first();
+        $method_name = $this->refer();
+        $method = Method::where('name',$method_name)->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
             if (class_exists($class)) {

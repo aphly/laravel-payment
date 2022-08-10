@@ -84,7 +84,7 @@ class PaypalController extends Controller
                     if($payment->status==1){
                         $capture = $this->order->capture($order_id);
                         $this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
-                        if($capture){
+                        if(isset($capture['status']) && $capture['status']=='COMPLETED'){
                             $payment->status=2;
                             if($payment->save() && $payment->notify_func){
                                 list($class,$func) = explode('@',$payment->notify_func);
@@ -94,15 +94,18 @@ class PaypalController extends Controller
                                 }
                                 return $this->callBack($payment->success_func,$payment);
                             }
-                        }
-                        if($payment->success_func){
-                            list($class,$func) = explode('@',$payment->success_func);
-                            if (class_exists($class) && method_exists($class,$func)){
-                                $this->log->debug('payment_paypal return success_func');
-                                return (new $class)->{$func}($payment);
+                            if($payment->success_func){
+                                list($class,$func) = explode('@',$payment->success_func);
+                                if (class_exists($class) && method_exists($class,$func)){
+                                    $this->log->debug('payment_paypal return success_func');
+                                    return (new $class)->{$func}($payment);
+                                }
                             }
+                            throw new ApiException(['code'=>0,'msg'=>'payment success']);
+                        }else{
+                            $this->log->debug('payment_paypal return APPROVED to COMPLETED error');
+                            return $this->callBack($payment->fail_func,$payment);
                         }
-                        throw new ApiException(['code'=>0,'msg'=>'payment success']);
                     }else if($payment->status>1){
                         return $this->callBack($payment->success_func,$payment);
                     }else{
