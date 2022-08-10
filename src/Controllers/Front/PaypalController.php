@@ -3,7 +3,6 @@
 namespace Aphly\LaravelPayment\Controllers\Front;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\Laravel\Libs\Func;
 use Aphly\LaravelPayment\Controllers\Controller;
 use Aphly\LaravelPayment\Models\Payment;
 
@@ -21,19 +20,15 @@ class PaypalController extends Controller
         $this->log = Log::channel('payment');
     }
 
-    public function pay($data)
+    public function pay($payment)
     {
         $this->log->debug('payment_paypal pay start');
-        $amount = number_format(floatval($data['amount']),2);
-        $data['currency_code'] = $data['currency_code']??'USD';
-        $data['return_url'] = Func::siteUrl(request()->url()).'/payment/return';
-        $payment = Payment::create($data);
-        if($amount && $payment->id){
+        if($payment->id){
             $purchaseUnits = [
                 [
                     'amount' => [
-                        'currency_code' => $data['currency_code'],
-                        'value' => $amount,
+                        'currency_code' => $payment->currency_code,
+                        'value' => $payment->amount,
                     ],
                     'invoice_id'=>$payment->id
                 ],
@@ -42,8 +37,8 @@ class PaypalController extends Controller
                 'brand_name' => env('APP_NAME'),
                 'shipping_preference' => 'NO_SHIPPING',
                 'user_action' => 'PAY_NOW',
-                'return_url' => $data['return_url'],
-                'cancel_url' => $data['cancel_url'],
+                'return_url' => $payment->return_url,
+                'cancel_url' => $payment->cancel_url,
             ];
             $res_arr = $this->order->create($purchaseUnits, 'CAPTURE', $applicationContext);
             if($res_arr['id']){

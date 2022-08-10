@@ -19,7 +19,6 @@ Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PayControl
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
-        Route::get('form', 'Aphly\LaravelPayment\Controllers\Front\PayController@form');
         Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PayController@return');
         Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PayController@show');
     });

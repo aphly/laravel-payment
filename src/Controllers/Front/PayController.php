@@ -17,14 +17,15 @@ class PayController extends Controller
         parent::__construct();
         $this->log = Log::channel('payment');
     }
-    public function pay($data)
+
+    public function pay($payment)
     {
         $this->log->debug('payment_pay start');
-        $method = Method::where('id',$data['method_id'])->where('status',1)->first();
+        $method = Method::where('id',$payment->method_id)->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Controllers\Front\\'.ucfirst($method->name).'Controller';
             if (class_exists($class)){
-                (new $class)->pay($data);
+                (new $class)->pay($payment);
             }
         }else{
             throw new ApiException(['code'=>1,'msg'=>'payment method error']);
@@ -82,14 +83,7 @@ class PayController extends Controller
         }
     }
 
-    public function form()
-    {
-        $data['method_id'] = 1;
-        $data['amount'] = 10.00;
-        $data['cancel_url'] = 'http://test2.com/payment/cancel_url';
-        $data['notify_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t1';
-        $data['success_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t2';
-        $data['fail_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t3';
-        $this->pay($data);
-    }
+
+
+
 }
