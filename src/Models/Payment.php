@@ -3,7 +3,6 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\Laravel\Libs\Func;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
 use Illuminate\Support\Facades\Cache;
@@ -37,7 +36,6 @@ class Payment extends Model
         if($data['amount']>0){
             $data['method_id'] = $data['method_id']??1;
             $data['currency_code'] = $data['currency_code']??'USD';
-            $data['return_url'] = Func::siteUrl(request()->url()).'/payment/return';
             return Payment::create($data);
         }else{
             throw new ApiException(['code'=>1,'msg'=>'payment amount error']);
