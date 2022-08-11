@@ -6,6 +6,7 @@ use Aphly\Laravel\Exceptions\ApiException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class Payment extends Model
 {
@@ -15,7 +16,7 @@ class Payment extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'method_id','transaction_id','status','amount','notify_func','success_func','fail_func','currency_code'
+        'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code'
     ];
 
     public function findAll() {
@@ -24,14 +25,22 @@ class Payment extends Model
         });
     }
 
+    public $log;
+
+    function __construct(){
+        parent::__construct();
+        $this->log = Log::channel('payment');
+    }
+
     public function make($data)
     {
 //        $data['method_id'] = 1;
 //        $data['amount'] = 10.00;
 //        $data['cancel_url'] = 'http://test2.com/payment/cancel_url';
 //        $data['notify_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t1';
-//        $data['success_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t2';
-//        $data['fail_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t3';
+//        $data['success_url'] = $host.'/account/group_success';
+//        $data['fail_url'] = $host.'/account/group_fail';
+
         $data['amount'] = number_format(floatval($data['amount']),2);
         if($data['amount']>0){
             $data['method_id'] = $data['method_id']??1;
@@ -39,6 +48,20 @@ class Payment extends Model
             return Payment::create($data);
         }else{
             throw new ApiException(['code'=>1,'msg'=>'payment amount error']);
+        }
+    }
+
+    public function pay($redirect = true)
+    {
+        $this->log->debug('payment_pay start');
+        $method = Method::where('id',$this->method_id)->where('status',1)->first();
+        if(!empty($method)){
+            $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+            if (class_exists($class)){
+                (new $class)->pay($this,$redirect);
+            }
+        }else{
+            throw new ApiException(['code'=>1,'msg'=>'payment method error']);
         }
     }
 }

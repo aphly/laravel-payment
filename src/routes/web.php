@@ -1,8 +1,5 @@
 <?php
 
-use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\LaravelPayment\Models\Payment;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,22 +12,13 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PayController@notify');
+Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@notify');
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
-        Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PayController@return');
-        Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PayController@show');
+        Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@return');
+        Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@show');
     });
-});
-
-Route::get('test', function (){
-    var_dump(request()->header('referer'));
-});
-
-Route::post('test', function (){
-    echo 'xxx';
-    var_dump(request()->header('referer'));
 });
 
 Route::middleware(['web'])->group(function () {

@@ -18,8 +18,8 @@ return new class extends Migration
             $table->integer('method_id')->index();
             $table->string('transaction_id',128)->nullable()->index();
             $table->string('notify_func',255);
-            $table->string('success_func',255);
-            $table->string('fail_func',255);
+            $table->string('success_url',255);
+            $table->string('fail_url',255);
             $table->tinyInteger('status')->nullable()->default(1);
             $table->decimal('amount',10,2);
             $table->char('currency_code',3)->nullable()->default('USD');
