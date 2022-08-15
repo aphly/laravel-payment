@@ -3,7 +3,6 @@
 namespace Aphly\LaravelPayment\Controllers\Front;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\LaravelPayment\Controllers\Controller;
 use Aphly\LaravelPayment\Models\Method;
 use Aphly\LaravelPayment\Models\Payment;
 use Illuminate\Http\Request;

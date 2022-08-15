@@ -1,10 +1,10 @@
 <?php
 
-namespace Aphly\LaravelPayment\Controllers;
+namespace Aphly\LaravelPayment\Controllers\Admin;
 
 use Illuminate\Support\Facades\View;
 
-class Controller extends \Aphly\Laravel\Controllers\Controller
+class Controller extends \Aphly\LaravelAdmin\Controllers\Controller
 {
     public function __construct()
     {
