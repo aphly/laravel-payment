@@ -2,6 +2,8 @@
 
 namespace Aphly\LaravelPayment\Controllers\Admin;
 
+use Aphly\LaravelAdmin\Models\Menu;
+use Aphly\LaravelAdmin\Models\Role;
 use Illuminate\Support\Facades\DB;
 
 class InstallController extends Controller
@@ -9,15 +11,17 @@ class InstallController extends Controller
     public $module_id = 4;
 
     public function install(){
+        $menu = Menu::create(['name' => 'Payment','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>30]);
+        if($menu){
+            $data=[];
+            $data[] =['name' => 'Method','url' =>'/payment_admin/method/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
+            $data[] =['name' => 'Payment','url' =>'/payment_admin/payment/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
+            DB::table('admin_menu')->insert($data);
+        }
+        $menuData = Menu::where(['module_id'=>$this->module_id])->get();
         $data=[];
-        $data[] =['id'=>40000,'name' => 'payment','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>30];
-        $data[] =['id'=>40001,'name' => 'method','url' =>'/payment_admin/method/index','pid'=>40000,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
-        $data[] =['id'=>40002,'name' => 'setting','url' =>'/payment_admin/setting/index','pid'=>40000,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
-        DB::table('admin_menu')->insert($data);
-
-        $data=[];
-        for($i=40000;$i<=40002;$i++){
-            $data[] =['role_id' => 2,'menu_id'=>$i];
+        foreach ($menuData as $val){
+            $data[] =['role_id' => Role::MANAGER,'menu_id'=>$val->id];
         }
         DB::table('admin_role_menu')->insert($data);
 
@@ -43,7 +47,6 @@ class InstallController extends Controller
             DB::table('admin_dict_value')->whereIn('dict_id',$ids)->delete();
         }
         DB::table('payment_method')->truncate();
-        DB::table('payment_setting')->truncate();
         return 'uninstall_ok';
     }
 
