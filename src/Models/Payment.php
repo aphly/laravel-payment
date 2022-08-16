@@ -19,6 +19,8 @@ class Payment extends Model
         'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code'
     ];
 
+    //status 1未支付 2已支付
+
     public function findAll() {
         return Cache::rememberForever('payment', function () {
             return self::get()->keyBy('id')->toArray();

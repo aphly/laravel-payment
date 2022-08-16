@@ -2,6 +2,7 @@
 
 namespace Aphly\LaravelPayment\Controllers\Admin;
 
+use Aphly\LaravelAdmin\Models\Dict;
 use Aphly\LaravelAdmin\Models\Menu;
 use Aphly\LaravelAdmin\Models\Role;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,7 @@ class InstallController extends Controller
 
     public function install(){
         $menu = Menu::create(['name' => 'Payment','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>30]);
-        if($menu){
+        if($menu->id){
             $data=[];
             $data[] =['name' => 'Method','url' =>'/payment_admin/method/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
             $data[] =['name' => 'Payment','url' =>'/payment_admin/payment/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
@@ -25,9 +26,17 @@ class InstallController extends Controller
         }
         DB::table('admin_role_menu')->insert($data);
 
-//        $data=[];
-//        DB::table('payment_method')->insert($data);
+        $data=[];
+        $data[] =['name' => 'paypal','status'=>1];
+        DB::table('payment_method')->insert($data);
 
+        $dict = Dict::create(['name' => '支付状态','key'=>'payment_status','module_id'=>$this->module_id]);
+        if($dict->id){
+            $data=[];
+            $data[] =['dict_id' => $dict->id,'name'=>'未支付','value'=>'1','fixed'=>'0'];
+            $data[] =['dict_id' => $dict->id,'name'=>'已支付','value'=>'2','fixed'=>'0'];
+            DB::table('admin_dict_value')->insert($data);
+        }
         return 'install_ok';
     }
     public function uninstall(){

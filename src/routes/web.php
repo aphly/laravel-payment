@@ -30,7 +30,7 @@ Route::middleware(['web'])->group(function () {
             Route::post('/method/install', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@del');
 
             $route_arr = [
-                ['method','\MethodController']
+                ['method','\MethodController'],['payment','\PaymentController']
             ];
             foreach ($route_arr as $val){
                 Route::get('/'.$val[0].'/index', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@index');
