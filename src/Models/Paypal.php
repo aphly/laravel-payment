@@ -3,7 +3,6 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\Laravel\Libs\Func;
 use Aphly\LaravelPayment\Services\Paypal\Order;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +34,7 @@ class Paypal
                 'brand_name' => env('APP_NAME'),
                 'shipping_preference' => 'NO_SHIPPING',
                 'user_action' => 'PAY_NOW',
-                'return_url' => Func::siteUrl(request()->url()).'/payment/return',
+                'return_url' => url('/payment/return'),
                 'cancel_url' => $payment->cancel_url,
             ];
             $res_arr = $this->order->create($purchaseUnits, 'CAPTURE', $applicationContext);
