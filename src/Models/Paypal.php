@@ -39,6 +39,7 @@ class Paypal
             ];
             $res_arr = $this->order->create($purchaseUnits, 'CAPTURE', $applicationContext);
             if($res_arr['id']){
+                $this->log->debug('payment_paypal pay create'.$res_arr['id']);
                 $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
                 $payment->transaction_id = $res_arr['id'];
                 $payment->save();
