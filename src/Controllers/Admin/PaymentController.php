@@ -32,6 +32,7 @@ class PaymentController extends Controller
             ->orderBy('id','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
         $res['method'] = Method::where('status',1)->get()->keyBy('id');
+
         return $this->makeView('laravel-payment::admin.payment.index',['res'=>$res]);
     }
 

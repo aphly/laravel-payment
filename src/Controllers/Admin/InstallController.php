@@ -5,6 +5,7 @@ namespace Aphly\LaravelPayment\Controllers\Admin;
 use Aphly\LaravelAdmin\Models\Dict;
 use Aphly\LaravelAdmin\Models\Menu;
 use Aphly\LaravelAdmin\Models\Role;
+use Aphly\LaravelPayment\Models\Method;
 use Illuminate\Support\Facades\DB;
 
 class InstallController extends Controller
@@ -26,9 +27,14 @@ class InstallController extends Controller
         }
         DB::table('admin_role_menu')->insert($data);
 
-        $data=[];
-        $data[] =['name' => 'paypal','status'=>1];
-        DB::table('payment_method')->insert($data);
+        $method = Method::create(['name' => 'paypal','status'=>1]);
+        if($method->id){
+            $data=[];
+            $data[] =['method_id' => $method->id,'key'=>'environment','val'=>''];
+            $data[] =['method_id' => $method->id,'key'=>'client_id','val'=>'AeUNXihK0N-R7lFPTp8hQ3e-v2lpnfYQfct2jRPb-25P6B2-NNS-xhbFDkFkfbJbDUJqfM7WoB5syu5-'];
+            $data[] =['method_id' => $method->id,'key'=>'secret','val'=>'EMP-lHKO5g1R-2nxmzhmc5sw_cDhyoCPgjIC45nKY1P-viR9hRzN37DpKallBOCTfakKI8jwffBIZVIW'];
+            DB::table('payment_method_params')->insert($data);
+        }
 
         $dict = Dict::create(['name' => '支付状态','key'=>'payment_status','module_id'=>$this->module_id]);
         if($dict->id){
@@ -56,6 +62,7 @@ class InstallController extends Controller
             DB::table('admin_dict_value')->whereIn('dict_id',$ids)->delete();
         }
         DB::table('payment_method')->truncate();
+        DB::table('payment_method_params')->truncate();
         return 'uninstall_ok';
     }
 

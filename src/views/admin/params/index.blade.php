@@ -1,5 +1,5 @@
 <div class="top-bar">
-    <h5 class="nav-title">method</h5>
+    <h5 class="nav-title">method - {{$res['method']->name}}</h5>
 </div>
 <style>
     .table_scroll .table_header li:nth-child(2),.table_scroll .table_tbody li:nth-child(2){flex: 0 0 300px;}
@@ -7,14 +7,14 @@
 <div class="imain">
     <div class="itop ">
         <div>
-            {{$res['method_info']->name}}
+            {{$res['method']->name}}
         </div>
         <div class="">
-            <a class="badge badge-primary ajax_get show_all0_btn" data-href="/payment_admin/method_params/form?method_id={{$res['method_id']}}">添加</a>
+            <a class="badge badge-primary ajax_get show_all0_btn" data-href="/payment_admin/params/form?method_id={{$res['method']->id}}">添加</a>
         </div>
     </div>
 
-    <form method="post"  action="/payment_admin/method_params/del?method_id={{$res['method_id']}}"  class="del_form">
+    <form method="post"  action="/payment_admin/params/del?method_id={{$res['method']->id}}"  class="del_form">
     @csrf
         <div class="table_scroll">
             <div class="table">
@@ -33,7 +33,7 @@
                             {{ $v['val'] }}
                         </li>
                         <li>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/method_params/form?method_id={{$res['method_id']}}&id={{$v['id']}}">编辑</a>
+                            <a class="badge badge-info ajax_get" data-href="/payment_admin/params/form?method_id={{$res['method']->id}}&id={{$v['id']}}">编辑</a>
                         </li>
                     </ul>
                     @endforeach

@@ -36,7 +36,7 @@
                     @foreach($res['list'] as $v)
                     <ul class="table_tbody">
                         <li><input type="checkbox" class="delete_box" name="delete[]" value="{{$v['id']}}">{{$v['id']}}</li>
-                        <li>{{ $res['method'][$v['id']]['name'] }}</li>
+                        <li>{{ $res['method'][$v['method_id']]['name'] }}</li>
                         <li>
                             {{$v['transaction_id']}}
                         </li>

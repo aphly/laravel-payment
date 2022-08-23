@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
 Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@notify');
 
 Route::middleware(['web'])->group(function () {
@@ -30,7 +32,7 @@ Route::middleware(['web'])->group(function () {
             Route::post('/method/install', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@del');
 
             $route_arr = [
-                ['method','\MethodController'],['payment','\PaymentController']
+                ['method','\MethodController'],['payment','\PaymentController'],['params','\ParamsController']
             ];
             foreach ($route_arr as $val){
                 Route::get('/'.$val[0].'/index', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@index');
@@ -38,11 +40,6 @@ Route::middleware(['web'])->group(function () {
                 Route::post('/'.$val[0].'/save', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@save');
                 Route::post('/'.$val[0].'/del', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@del');
             }
-
-            Route::get('/method_params/index', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsIndex');
-            Route::get('/method_params/form', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsForm');
-            Route::post('/method_params/save', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsSave');
-            Route::post('/method_params/del', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@paramsDel');
 
         });
     });
