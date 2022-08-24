@@ -7,20 +7,20 @@
 <div class="imain">
     <div class="itop ">
         <form method="get" action="/payment_admin/payment/index" class="select_form">
-        <div class="filter ">
-            <input type="search" name="id" placeholder="id" autocomplete="false" value="{{$res['filter']['id']}}">
+        <div class="search_box ">
+            <input type="search" name="id" placeholder="id" autocomplete="false" value="{{$res['search']['id']}}">
             <select name="method_id" >
                 @foreach($res['method'] as $val)
                 <option value="{{$val->id}}">{{$val->name}}</option>
                 @endforeach
             </select>
-            <input type="search" name="transaction_id" placeholder="transaction_id" autocomplete="false" value="{{$res['filter']['transaction_id']}}">
+            <input type="search" name="transaction_id" placeholder="transaction_id" autocomplete="false" value="{{$res['search']['transaction_id']}}">
             <button class="" type="submit">搜索</button>
         </div>
         </form>
     </div>
 
-    <form method="post"  @if($res['filter']['string']) action="/payment_admin/payment/del?{{$res['filter']['string']}}" @else action="/payment_admin/payment/del" @endif  class="del_form">
+    <form method="post"  @if($res['search']['string']) action="/payment_admin/payment/del?{{$res['search']['string']}}" @else action="/payment_admin/payment/del" @endif  class="del_form">
     @csrf
         <div class="table_scroll">
             <div class="table">

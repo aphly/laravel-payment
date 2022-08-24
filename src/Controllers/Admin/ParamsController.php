@@ -14,8 +14,8 @@ class ParamsController extends Controller
 
     public function index(Request $request){
         $res['method'] = (new Method)->getInfo($request);
-        $res['filter']['title'] = $title = $request->query('title', false);
-        $res['filter']['string'] = http_build_query($request->query());
+        $res['search']['title'] = $title = $request->query('title', false);
+        $res['search']['string'] = http_build_query($request->query());
         $res['list'] = MethodParams::where('method_id',$res['method']->id)
             ->Paginate(config('admin.perPage'))->withQueryString();
         return $this->makeView('laravel-payment::admin.params.index', ['res' => $res]);
