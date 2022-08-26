@@ -13,11 +13,11 @@ class InstallController extends Controller
     public $module_id = 4;
 
     public function install(){
-        $menu = Menu::create(['name' => 'Payment','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>30]);
+        $menu = Menu::create(['name' => '支付中心','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>20]);
         if($menu->id){
             $data=[];
-            $data[] =['name' => 'Method','url' =>'/payment_admin/method/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
-            $data[] =['name' => 'Payment','url' =>'/payment_admin/payment/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
+            $data[] =['name' => '支付方式','url' =>'/payment_admin/method/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
+            $data[] =['name' => '流水号','url' =>'/payment_admin/payment/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
             DB::table('admin_menu')->insert($data);
         }
         $menuData = Menu::where(['module_id'=>$this->module_id])->get();

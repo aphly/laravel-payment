@@ -18,7 +18,6 @@ return new class extends Migration
             $table->unsignedBigInteger('method_id')->index();
             $table->string('key',32);
             $table->string('val',255)->nullable();
-            $table->timestamps();
         });
     }
 

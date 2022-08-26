@@ -23,7 +23,8 @@ return new class extends Migration
             $table->tinyInteger('status')->nullable()->default(1);
             $table->decimal('amount',10,2);
             $table->char('currency_code',3)->nullable()->default('USD');
-            $table->timestamps();
+            $table->unsignedBigInteger('created_at');
+            $table->unsignedBigInteger('updated_at');
         });
     }
 

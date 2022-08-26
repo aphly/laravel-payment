@@ -11,7 +11,7 @@ class MethodParams extends Model
     use HasFactory;
     protected $table = 'payment_method_params';
     protected $primaryKey = 'id';
-
+    public $timestamps = false;
 
     protected $fillable = [
         'key','val','method_id'

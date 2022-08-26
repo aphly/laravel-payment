@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('name',32)->nullable();
             $table->tinyInteger('status')->nullable()->default(1);
             $table->integer('sort')->nullable()->default(1)->index();
-            $table->timestamps();
+            $table->unsignedBigInteger('created_at');
+            $table->unsignedBigInteger('updated_at');
         });
     }
 
