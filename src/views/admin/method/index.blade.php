@@ -24,7 +24,7 @@
                 <ul class="table_header">
                     <li >ID</li>
                     <li >method name</li>
-                    <li >sort</li>
+                    <li >status</li>
                     <li >操作</li>
                 </ul>
                 @if($res['list']->total())
@@ -33,7 +33,13 @@
                         <li><input type="checkbox" class="delete_box" name="delete[]" value="{{$v['id']}}">{{$v['id']}}</li>
                         <li>{{ $v['name'] }}</li>
                         <li>
-                            {{$v->sort}}
+                            @if($dict['status'])
+                                @if($v['status']==1)
+                                    <span class="badge badge-success">{{$dict['status'][$v['status']]}}</span>
+                                @else
+                                    <span class="badge badge-secondary">{{$dict['status'][$v['status']]}}</span>
+                                @endif
+                            @endif
                         </li>
                         <li>
                             <a class="badge badge-info ajax_get" data-href="/payment_admin/method/form?id={{$v['id']}}">编辑</a>
