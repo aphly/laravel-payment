@@ -13,7 +13,7 @@ class InstallController extends Controller
     public $module_id = 4;
 
     public function install(){
-        $menu = Menu::create(['name' => '支付中心','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>20]);
+        $menu = Menu::create(['name' => '支付中心','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>10]);
         if($menu->id){
             $data=[];
             $data[] =['name' => '支付方式','url' =>'/payment_admin/method/index','pid'=>$menu->id,'is_leaf'=>1,'module_id'=>$this->module_id,'sort'=>0];
