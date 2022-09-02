@@ -17,7 +17,8 @@
     "require": {
         "php": ">=8.0",
         "aphly/laravel": ">=1.0",
-        "aphly/laravel-admin": ">=1.0"
+        "aphly/laravel-admin": ">=1.0",
+        "stripe/stripe-php": ">=1.0"
     },
     "extra": {
         "laravel": {

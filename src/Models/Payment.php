@@ -16,7 +16,7 @@ class Payment extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code'
+        'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code','cancel_url'
     ];
 
     //status 1未支付 2已支付
