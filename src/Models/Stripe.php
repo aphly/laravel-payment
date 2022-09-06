@@ -13,15 +13,26 @@ class Stripe
 
     public $log;
 
+    public $environment = '';
+    public $pk = '';
+    public $sk = '';
+
     function __construct(){
         $this->log = Log::channel('payment');
+        $method = Method::where('name','stripe')->with('params')->first();
+        if(!empty($method)){
+            foreach ($method->params as $val){
+                $key = $val->key;
+                $this->$key = $val->val;
+            }
+        }
     }
 
     public function pay($payment,$redirect=true)
     {
         $this->log->debug('payment_stripe pay start');
         if($payment->id){
-            $stripe = new StripeClient(env('SCRIPE_SECRET_KEY'));
+            $stripe = new StripeClient($this->sk);
             $checkoutSession = $stripe->checkout->sessions->create([
                 'success_url' =>  $payment->success_url,
                 'cancel_url' => $payment->cancel_url,
@@ -149,7 +160,7 @@ class Stripe
     }
 
     function notify(){
-        \Stripe\Stripe::setApiKey(env('SCRIPE_SECRET_KEY'));
+        \Stripe\Stripe::setApiKey($this->sk);
         $this->log->debug('payment_stripe notify start');
         $endpoint_secret = env('NOTIFY_SIGN');
         $payload = @file_get_contents('php://input');

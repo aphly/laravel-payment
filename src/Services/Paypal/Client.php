@@ -24,10 +24,10 @@ class Client
     {
         $method = Method::where('name','paypal')->with('params')->first();
         if(!empty($method)){
-            $list = MethodParams::where('method_id',1)->get()->keyBy('key');
-            $this->environment = $list['environment']['val'];
-            $this->client_id = $list['client_id']['val'];
-            $this->secret = $list['secret']['val'];
+            foreach ($method->params as $val){
+                $key = $val->key;
+                $this->$key = $val->val;
+            }
         }
     }
 
