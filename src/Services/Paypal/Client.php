@@ -2,6 +2,7 @@
 
 namespace Aphly\LaravelPayment\Services\Paypal;
 
+use Aphly\LaravelPayment\Models\Method;
 use Aphly\LaravelPayment\Models\MethodParams;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -21,10 +22,13 @@ class Client
 
     function __construct()
     {
-        $list = MethodParams::where('method_id',1)->get()->keyBy('key');
-        $this->environment = $list['environment']['val'];
-        $this->client_id = $list['client_id']['val'];
-        $this->secret = $list['secret']['val'];
+        $method = Method::where('name','paypal')->with('params')->first();
+        if(!empty($method)){
+            $list = MethodParams::where('method_id',1)->get()->keyBy('key');
+            $this->environment = $list['environment']['val'];
+            $this->client_id = $list['client_id']['val'];
+            $this->secret = $list['secret']['val'];
+        }
     }
 
     public function generateBaseUrl($v=true): string {

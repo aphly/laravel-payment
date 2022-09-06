@@ -36,4 +36,8 @@ class Method extends Model
             throw new ApiException(['code'=>2,'msg'=>'fail','data'=>[]]);
         }
     }
+
+    function params(){
+        return $this->hasMany(MethodParams::class,'method_id','id');
+    }
 }

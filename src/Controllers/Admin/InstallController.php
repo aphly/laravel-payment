@@ -36,6 +36,15 @@ class InstallController extends Controller
             DB::table('payment_method_params')->insert($data);
         }
 
+        $method = Method::create(['name' => 'stripe','status'=>1]);
+        if($method->id){
+            $data=[];
+            $data[] =['method_id' => $method->id,'key'=>'environment','val'=>''];
+            $data[] =['method_id' => $method->id,'key'=>'pk','val'=>'pk_test_51Lev4CB2u33uLmOKX6Wn0dUevviRypd7bb1vTwH4q9AcCjT9yxFGVBMLWQrKrL7qA0DNoHrfKzL2w4Qmvp0I9LqJ00MGHJAEJ7'];
+            $data[] =['method_id' => $method->id,'key'=>'sk','val'=>'sk_test_51Lev4CB2u33uLmOKI6ESGWaTfKiT4zOPZYRDe2yMizTozDQH6tpkuDxmf8uAV21vURIjUOngEnQQdXmSIvrWzb0j003d3rF8IL'];
+            DB::table('payment_method_params')->insert($data);
+        }
+
         $dict = Dict::create(['name' => '支付状态','key'=>'payment_status','module_id'=>$this->module_id]);
         if($dict->id){
             $data=[];
