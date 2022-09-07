@@ -34,7 +34,7 @@ class Paypal
                 'brand_name' => env('APP_NAME'),
                 'shipping_preference' => 'NO_SHIPPING',
                 'user_action' => 'PAY_NOW',
-                'return_url' => url('/payment/return'),
+                'return_url' => url('/payment/return/paypal'),
                 'cancel_url' => $payment->cancel_url,
             ];
             $res_arr = $this->order->create($purchaseUnits, 'CAPTURE', $applicationContext);

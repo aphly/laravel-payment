@@ -50,7 +50,7 @@ class Stripe
                 'mode' => 'payment',
             ]);
             if($checkoutSession->payment_intent){
-                $this->log->debug('payment_stripe pay create'.$checkoutSession->payment_intent);
+                $this->log->debug('payment_stripe pay create '.$checkoutSession->payment_intent);
                 $pay_url = $checkoutSession->url;
                 $payment->transaction_id = $checkoutSession->payment_intent;
                 $payment->save();
@@ -182,11 +182,6 @@ class Stripe
         switch ($event->type) {
             case 'checkout.session.completed':
                 $this->log->debug('payment_stripe notify completed ',get_object_vars ($session));
-                create_order($session);
-                if ($session->payment_status == 'paid') {
-                    // Fulfill the purchase
-                    fulfill_order($session);
-                }
                 break;
             case 'checkout.session.async_payment_succeeded':
                 $this->log->debug('payment_stripe notify async_payment_succeeded ',get_object_vars ($session));
@@ -196,7 +191,7 @@ class Stripe
                 break;
         }
 
-        $payment = Payment::where(['transaction_id'=>$order_id,'id'=>$invoice_id])->first();
+        //$payment = Payment::where(['transaction_id'=>$order_id,'id'=>$invoice_id])->first();
 
     }
 

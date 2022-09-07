@@ -14,12 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::match(['get','post'],'test/index', 'Aphly\LaravelPayment\Controllers\Front\TestController@index');
+Route::match(['post'],'test/notify', 'Aphly\LaravelPayment\Controllers\Front\TestController@notify');
 
-Route::post('payment/notify', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@notify');
+Route::post('payment/notify/{method_name}', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@notify');
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
-        Route::get('return', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@return');
+        Route::get('return/{method_name}', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@return');
         Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@show');
     });
 });

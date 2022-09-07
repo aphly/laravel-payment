@@ -17,22 +17,10 @@ class PaymentController extends Controller
         $this->log = Log::channel('payment');
     }
 
-    public function refer()
+    public function notify(Request $request)
     {
-        $method_name = 'paypal';
-//        if(isset($_SERVER['HTTP_REFERER'])) {
-//            $method_name = 1;
-//        }else{
-//            $method_name = 0;
-//        }
-        return $method_name;
-    }
-
-    public function notify()
-    {
-        $this->log->debug('payment_notify start');
-        $method_name = $this->refer();
-        $method = Method::where('name',$method_name)->where('status',1)->first();
+        $this->log->debug('payment_notify start '.$request->header('host'));
+        $method = Method::where('name',$request->method_name)->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
             if (class_exists($class)) {
@@ -41,11 +29,10 @@ class PaymentController extends Controller
         }
     }
 
-    public function return()
+    public function return(Request $request)
     {
         $this->log->debug('payment_return start');
-        $method_name = $this->refer();
-        $method = Method::where('name',$method_name)->where('status',1)->first();
+        $method = Method::where('name',$request->method_name)->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
             if (class_exists($class)) {
