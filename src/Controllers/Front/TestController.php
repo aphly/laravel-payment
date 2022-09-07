@@ -12,6 +12,7 @@ use Stripe\Webhook;
 
 class TestController extends Controller
 {
+    public $log = '';
     public $environment = '';
     public $pk = '';
     public $sk = '';
@@ -52,8 +53,8 @@ class TestController extends Controller
                     ],
                 ],
             ]);
-            dd($checkoutSession);
             $this->log->debug('payment_stripe start');
+            $this->log->debug($checkoutSession);
             $pay_url = $checkoutSession->url;
             redirect($pay_url)->cookie('payment_token', encrypt('1,'.$checkoutSession->payment_intent), 60)->send();
         }else{
@@ -100,4 +101,16 @@ class TestController extends Controller
         return '';
     }
 
+    function show(){
+        $stripe = new StripeClient($this->sk);
+//        $payment_intent = $stripe->paymentIntents->retrieve(
+//            'pi_3LfJsaB2u33uLmOK1Y8m6KvO',[]
+//        );
+//        dd($payment_intent);
+        $sessions = $stripe->checkout->sessions->retrieve(
+            'cs_test_a19NdETDGmQoQj9ozdZzEEvEqh1KXcOUs4iF3dbMrbiFXzJXWm7UlDfCp1',
+            []
+        );
+        dd($sessions);
+    }
 }
