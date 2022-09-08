@@ -16,7 +16,7 @@ class Payment extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code','cancel_url'
+        'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code','cancel_url','ts_id'
     ];
 
     //status 1未支付 2已支付
@@ -36,13 +36,6 @@ class Payment extends Model
 
     public function make($data)
     {
-//        $data['method_id'] = 1;
-//        $data['amount'] = 10.00;
-//        $data['cancel_url'] = 'http://test2.com/payment/cancel_url';
-//        $data['notify_func'] = '\Aphly\LaravelPayment\Controllers\Front\PayController@t1';
-//        $data['success_url'] = $host.'/account/group_success';
-//        $data['fail_url'] = $host.'/account/group_fail';
-
         $data['amount'] = number_format(floatval($data['amount']),2);
         if($data['amount']>0){
             $data['method_id'] = $data['method_id']??1;

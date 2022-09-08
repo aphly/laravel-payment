@@ -15,17 +15,20 @@ return new class extends Migration
     {
         Schema::create('payment', function (Blueprint $table){
             $table->id();
-            $table->integer('method_id')->index();
-            $table->string('transaction_id',128)->nullable()->index();
+            $table->integer('method_id');
+            $table->string('ts_id',128)->nullable();
+            $table->string('transaction_id',128)->nullable();
             $table->string('notify_func',255);
             $table->string('success_url',255);
             $table->string('fail_url',255);
             $table->string('cancel_url',255);
             $table->tinyInteger('status')->nullable()->default(1);
+            $table->string('notify_type')->nullable();
             $table->decimal('amount',10,2);
             $table->char('currency_code',3)->nullable()->default('USD');
             $table->unsignedBigInteger('created_at');
             $table->unsignedBigInteger('updated_at');
+            $table->index(['method_id','ts_id']);
         });
     }
 

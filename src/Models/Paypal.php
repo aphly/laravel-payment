@@ -41,7 +41,7 @@ class Paypal
             if($res_arr['id']){
                 $this->log->debug('payment_paypal pay create'.$res_arr['id']);
                 $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
-                $payment->transaction_id = $res_arr['id'];
+                $payment->ts_id = $res_arr['id'];
                 $payment->save();
                 if($redirect){
                     redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$res_arr['id']), 60)->send();
@@ -80,16 +80,18 @@ class Paypal
             $payment_token = decrypt($_COOKIE["payment_token"]);
         }
         if($payment_token){
-            list($payment_id,$order_id) = explode(',',$payment_token);
-            if($order_id == $request->query('token')){
+            list($payment_id,$ts_id) = explode(',',$payment_token);
+            if($ts_id == $request->query('token')){
                 $this->log->debug('payment_paypal return start',$request->all());
                 $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
                 if(!empty($payment)){
                     if($payment->status==1){
-                        $capture = $this->order->capture($order_id);
+                        $capture = $this->order->capture($ts_id);
                         $this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
                         if(isset($capture['status']) && $capture['status']=='COMPLETED'){
                             $payment->status=2;
+                            $payment->notify_type='return';
+                            $payment->transaction_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
                             if($payment->save() && $payment->notify_func){
                                 $this->callBack($payment->notify_func,$payment,true);
                             }
@@ -114,9 +116,8 @@ class Paypal
         }
     }
 
-    public function notify($method_id)
+    public function notify()
     {
-        //$input = request()->all();
         $raw_post_data = file_get_contents('php://input');
         if($raw_post_data){
             $input = json_decode($raw_post_data,true);
@@ -124,16 +125,18 @@ class Paypal
                 throw new ApiException(['code'=>-2,'msg'=>'fail']);
             }
             $this->log->debug('payment_paypal notify start',$input);
-            $order_id = $input['resource']['supplementary_data']['related_ids']['order_id'];
+            $ts_id = $input['resource']['supplementary_data']['related_ids']['order_id'];
             $invoice_id = $input['resource']['invoice_id'];
-            $payment = Payment::where(['transaction_id'=>$order_id,'id'=>$invoice_id])->first();
+            $payment = Payment::where(['ts_id'=>$ts_id,'id'=>$invoice_id])->first();
             if(!empty($payment)){
                 if($payment->status!=1){
                     throw new ApiException('');
                 }
-                $info = $this->order->show($order_id);
-                if($info['status']=='COMPLETED'){
+                $orderShow = $this->order->show($ts_id);
+                if($orderShow['status']=='COMPLETED'){
                     $payment->status=2;
+                    $payment->notify_type='notify';
+                    $payment->transaction_id=$input['resource']['id'];
                     if($payment->save() && $payment->notify_func){
                         $this->callBack($payment->notify_func,$payment,true);
                     }
@@ -151,7 +154,7 @@ class Paypal
 
     public function show($payment)
     {
-        $info = $this->order->show($payment->transaction_id);
+        $info = $this->order->show($payment->ts_id);
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
     }
 
