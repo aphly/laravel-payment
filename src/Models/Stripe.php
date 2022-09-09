@@ -16,6 +16,7 @@ class Stripe
     public $environment = '';
     public $pk = '';
     public $sk = '';
+    public $es = '';
 
     function __construct(){
         $this->log = Log::channel('payment');
@@ -123,18 +124,20 @@ class Stripe
             }else{
                 throw new ApiException(['code'=>1,'msg'=>'fail']);
             }
-
         }else{
             throw new ApiException(['code'=>-2,'msg'=>'payment_token error']);
         }
     }
 
-    function notify(){
+    function notify($method_id){
         \Stripe\Stripe::setApiKey($this->sk);
         $this->log->debug('payment_stripe notify start');
         $payload = @file_get_contents('php://input');
+        $this->log->debug($payload);
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+        $this->log->debug($sig_header);
         $endpoint_secret = $this->es;
+        $this->log->debug($endpoint_secret);
         $event = null;
         try {
             $event = Webhook::constructEvent(
@@ -154,7 +157,23 @@ class Stripe
             case 'checkout.session.completed':
                 $this->log->debug('payment_stripe notify completed ');
                 if($session->payment_status == 'paid') {
-
+                    $payment_id = $session->client_reference_id;
+                    $payment = Payment::where(['id'=>$payment_id])->first();
+                    if(!empty($payment)){
+                        if($payment->status>1){
+                            $this->log->debug('payment_stripe notify completed status>1');
+                        }else if($payment->status==1 && $payment->ts_id==$session->id){
+                            $this->log->debug('payment_stripe notify completed status==1');
+                            $payment->status=2;
+                            $payment->notify_type='notify';
+                            $payment->transaction_id=$session->payment_intent;
+                            if($payment->save() && $payment->notify_func){
+                                $this->callBack($payment->notify_func,$payment,true);
+                            }
+                        }else{
+                            $this->log->debug('payment_stripe notify completed status');
+                        }
+                    }
                 }
                 break;
             case 'checkout.session.async_payment_succeeded':
@@ -164,8 +183,6 @@ class Stripe
                 $this->log->debug('payment_stripe notify async_payment_failed ');
                 break;
         }
-
-        //$payment = Payment::where(['transaction_id'=>$order_id,'id'=>$invoice_id])->first();
         throw new ApiException('');
     }
 
