@@ -1,5 +1,5 @@
     </div>
-<script src="{{ URL::asset('vendor/laravel-admin/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ URL::asset('static/admin/js/bootstrap.bundle.min.js') }}"></script>
 <script>
     var aphly_viewerjs = document.getElementById('aphly_viewerjs');
     if(aphly_viewerjs){

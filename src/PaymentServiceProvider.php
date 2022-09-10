@@ -28,7 +28,7 @@ class PaymentServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__.'/config/payment.php' => config_path('payment.php'),
-            __DIR__.'/public' => public_path('vendor/laravel-payment')
+            __DIR__.'/public' => public_path('static/payment')
         ]);
         $this->loadMigrationsFrom(__DIR__.'/migrations');
         $this->loadViewsFrom(__DIR__.'/views', 'laravel-payment');
