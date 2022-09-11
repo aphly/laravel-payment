@@ -31,14 +31,14 @@ class PaymentController extends Controller
                 })
             ->orderBy('id','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
-        $res['method'] = Method::where('status',1)->get()->keyBy('id');
-
+        $res['method'] = Method::get()->keyBy('id');
         return $this->makeView('laravel-payment::admin.payment.index',['res'=>$res]);
     }
 
     public function form(Request $request)
     {
         $res['info'] = Payment::where('id',$request->query('id',0))->firstOrNew();
+        $res['method'] = Method::get()->keyBy('id');
         return $this->makeView('laravel-payment::admin.payment.form',['res'=>$res]);
     }
 
