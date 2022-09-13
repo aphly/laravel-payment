@@ -1,4 +1,5 @@
 **laravel 支付**<br>
+支持 paypal stripe<br>
 
 环境<br>
 php8.0+<br>
