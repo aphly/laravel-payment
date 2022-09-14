@@ -18,9 +18,7 @@ Route::match(['get','post'],'test/index', 'Aphly\LaravelPayment\Controllers\Fron
 Route::match(['post'],'test/notify', 'Aphly\LaravelPayment\Controllers\Front\TestController@notify');
 Route::match(['get','post'],'test/show', 'Aphly\LaravelPayment\Controllers\Front\TestController@show');
 
-
-
-Route::post('payment/notify/{method_name}', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@notify');
+Route::post('payment/{method_name}/notify', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@notify');
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
