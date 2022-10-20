@@ -4,13 +4,23 @@ namespace Aphly\LaravelPayment\Controllers\Admin;
 
 use Aphly\LaravelAdmin\Models\Dict;
 use Aphly\LaravelAdmin\Models\Menu;
+use Aphly\LaravelAdmin\Models\Module;
 use Aphly\LaravelAdmin\Models\Role;
 use Aphly\LaravelPayment\Models\Method;
 use Illuminate\Support\Facades\DB;
 
 class InstallController extends Controller
 {
-    public $module_id = 4;
+    public $module_id = 0;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $module = Module::where('key','payment')->first();
+        if(!empty($module)){
+            $this->module_id = $module->id;
+        }
+    }
 
     public function install(){
         $menu = Menu::create(['name' => '支付中心','url' =>'','pid'=>0,'is_leaf'=>0,'module_id'=>$this->module_id,'sort'=>10]);
