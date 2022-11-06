@@ -49,7 +49,7 @@ class Payment extends Model
     public function pay($redirect = true)
     {
         $this->log->debug('payment_pay start');
-        $method = Method::where('id',$this->method_id)->where('status',1)->first();
+        $method = PaymentMethod::where('id',$this->method_id)->where('status',1)->first();
         if(!empty($method)){
             $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
             if (class_exists($class)){

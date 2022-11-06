@@ -3,8 +3,8 @@
 namespace Aphly\LaravelPayment\Controllers\Admin;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\LaravelPayment\Models\Method;
-use Aphly\LaravelPayment\Models\MethodParams;
+use Aphly\LaravelPayment\Models\PaymentMethod;
+use Aphly\LaravelPayment\Models\PaymentMethodParams;
 use Illuminate\Http\Request;
 
 class MethodController extends Controller
@@ -15,7 +15,7 @@ class MethodController extends Controller
     {
         $res['search']['name'] = $name = $request->query('name',false);
         $res['search']['string'] = http_build_query($request->query());
-        $res['list'] = Method::when($name,
+        $res['list'] = PaymentMethod::when($name,
                 function($query,$name) {
                     return $query->where('name', 'like', '%'.$name.'%');
                 })
@@ -26,12 +26,12 @@ class MethodController extends Controller
 
     public function form(Request $request)
     {
-        $res['info'] = Method::where('id',$request->query('id',0))->firstOrNew();
+        $res['info'] = PaymentMethod::where('id',$request->query('id',0))->firstOrNew();
         return $this->makeView('laravel-payment::admin.method.form',['res'=>$res]);
     }
 
     public function save(Request $request){
-        Method::updateOrCreate(['id'=>$request->query('id',0)],$request->all());
+        PaymentMethod::updateOrCreate(['id'=>$request->query('id',0)],$request->all());
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
     }
 
@@ -41,7 +41,7 @@ class MethodController extends Controller
         $redirect = $query?$this->index_url.'?'.http_build_query($query):$this->index_url;
         $post = $request->input('delete');
         if(!empty($post)){
-            Method::whereIn('id',$post)->delete();
+            PaymentMethod::whereIn('id',$post)->delete();
             throw new ApiException(['code'=>0,'msg'=>'操作成功','data'=>['redirect'=>$redirect]]);
         }
     }

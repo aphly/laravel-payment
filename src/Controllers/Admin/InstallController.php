@@ -6,7 +6,7 @@ use Aphly\LaravelAdmin\Models\Dict;
 use Aphly\LaravelAdmin\Models\Menu;
 use Aphly\LaravelAdmin\Models\Module;
 use Aphly\LaravelAdmin\Models\Role;
-use Aphly\LaravelPayment\Models\Method;
+use Aphly\LaravelPayment\Models\PaymentMethod;
 use Illuminate\Support\Facades\DB;
 
 class InstallController extends Controller
@@ -37,7 +37,7 @@ class InstallController extends Controller
         }
         DB::table('admin_role_menu')->insert($data);
 
-        $method = Method::create(['name' => 'paypal','status'=>1]);
+        $method = PaymentMethod::create(['name' => 'paypal','status'=>1]);
         if($method->id){
             $data=[];
             $data[] =['method_id' => $method->id,'key'=>'environment','val'=>''];
@@ -46,7 +46,7 @@ class InstallController extends Controller
             DB::table('payment_method_params')->insert($data);
         }
 
-        $method = Method::create(['name' => 'stripe','status'=>1]);
+        $method = PaymentMethod::create(['name' => 'stripe','status'=>1]);
         if($method->id){
             $data=[];
             $data[] =['method_id' => $method->id,'key'=>'pk','val'=>'pk_test_51Lev4CB2u33uLmOKX6Wn0dUevviRypd7bb1vTwH4q9AcCjT9yxFGVBMLWQrKrL7qA0DNoHrfKzL2w4Qmvp0I9LqJ00MGHJAEJ7'];

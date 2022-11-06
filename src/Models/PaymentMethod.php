@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
 use Illuminate\Support\Facades\Cache;
 
-class Method extends Model
+class PaymentMethod extends Model
 {
     use HasFactory;
     protected $table = 'payment_method';
@@ -20,7 +20,7 @@ class Method extends Model
 
     public function findAll() {
         return Cache::rememberForever('payment_method', function () {
-            return self::get()->keyBy('id')->toArray();
+            return self::where(['status'=>1])->orderBy('sort','desc')->get()->keyBy('id')->toArray();
         });
     }
 
@@ -38,6 +38,6 @@ class Method extends Model
     }
 
     function params(){
-        return $this->hasMany(MethodParams::class,'method_id','id');
+        return $this->hasMany(PaymentMethodParams::class,'method_id','id');
     }
 }

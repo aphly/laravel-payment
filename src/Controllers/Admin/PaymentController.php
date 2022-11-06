@@ -3,7 +3,7 @@
 namespace Aphly\LaravelPayment\Controllers\Admin;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Aphly\LaravelPayment\Models\Method;
+use Aphly\LaravelPayment\Models\PaymentMethod;
 use Aphly\LaravelPayment\Models\Payment;
 use Illuminate\Http\Request;
 
@@ -31,14 +31,14 @@ class PaymentController extends Controller
                 })
             ->orderBy('id','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
-        $res['method'] = Method::get()->keyBy('id');
+        $res['method'] = PaymentMethod::get()->keyBy('id');
         return $this->makeView('laravel-payment::admin.payment.index',['res'=>$res]);
     }
 
     public function form(Request $request)
     {
         $res['info'] = Payment::where('id',$request->query('id',0))->firstOrNew();
-        $res['method'] = Method::get()->keyBy('id');
+        $res['method'] = PaymentMethod::get()->keyBy('id');
         return $this->makeView('laravel-payment::admin.payment.form',['res'=>$res]);
     }
 

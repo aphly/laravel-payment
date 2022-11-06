@@ -20,7 +20,7 @@ class Stripe
 
     function __construct(){
         $this->log = Log::channel('payment');
-        $method = Method::where('name','stripe')->with('params')->first();
+        $method = PaymentMethod::where('name','stripe')->with('params')->first();
         if(!empty($method)){
             foreach ($method->params as $val){
                 $key = $val->key;

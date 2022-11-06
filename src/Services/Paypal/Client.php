@@ -2,8 +2,8 @@
 
 namespace Aphly\LaravelPayment\Services\Paypal;
 
-use Aphly\LaravelPayment\Models\Method;
-use Aphly\LaravelPayment\Models\MethodParams;
+use Aphly\LaravelPayment\Models\PaymentMethod;
+use Aphly\LaravelPayment\Models\PaymentMethodParams;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -22,7 +22,7 @@ class Client
 
     function __construct()
     {
-        $method = Method::where('name','paypal')->with('params')->first();
+        $method = PaymentMethod::where('name','paypal')->with('params')->first();
         if(!empty($method)){
             foreach ($method->params as $val){
                 $key = $val->key;
