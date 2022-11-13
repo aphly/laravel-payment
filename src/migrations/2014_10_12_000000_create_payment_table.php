@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('cancel_url',255);
             $table->tinyInteger('status')->nullable()->default(1);
             $table->string('notify_type')->nullable();
-            $table->decimal('amount',15,4);
+            $table->decimal('amount',15,2);
             $table->char('currency_code',3)->nullable()->default('USD');
             $table->unsignedBigInteger('created_at');
             $table->unsignedBigInteger('updated_at');
