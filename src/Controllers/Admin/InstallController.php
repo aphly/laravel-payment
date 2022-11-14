@@ -65,21 +65,7 @@ class InstallController extends Controller
         return 'install_ok';
     }
     public function uninstall(){
-        $admin_menu = DB::table('admin_menu')->where('module_id',$this->module_id);
-        $arr = $admin_menu->get()->toArray();
-        if($arr){
-            $admin_menu->delete();
-            $ids = array_column($arr,'id');
-            DB::table('admin_role_menu')->whereIn('menu_id',$ids)->delete();
-        }
-
-        $admin_dict = DB::table('admin_dict')->where('module_id',$this->module_id);
-        $arr = $admin_dict->get()->toArray();
-        if($arr){
-            $admin_dict->delete();
-            $ids = array_column($arr,'id');
-            DB::table('admin_dict_value')->whereIn('dict_id',$ids)->delete();
-        }
+        parent::uninstall();
         DB::table('payment_method')->truncate();
         DB::table('payment_method_params')->truncate();
         return 'uninstall_ok';
