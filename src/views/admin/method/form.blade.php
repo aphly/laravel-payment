@@ -17,6 +17,17 @@
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
+                <label for="">默认</label>
+                <select name="default" class="form-control">
+                    @if(isset($dict['yes_no']))
+                        @foreach($dict['yes_no'] as $key=>$val)
+                            <option value="{{$key}}" @if($res['info']->default==$key) selected @endif>{{$val}}</option>
+                        @endforeach
+                    @endif
+                </select>
+                <div class="invalid-feedback"></div>
+            </div>
+            <div class="form-group">
                 <label for="">状态</label>
                 <select name="status"  class="form-control">
                     @if(isset($dict['status']))

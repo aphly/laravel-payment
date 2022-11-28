@@ -15,7 +15,7 @@ class PaymentMethod extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'name','sort','status'
+        'name','sort','status','default'
     ];
 
     public function findAll() {

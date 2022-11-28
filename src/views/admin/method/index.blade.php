@@ -24,6 +24,7 @@
                 <ul class="table_header">
                     <li >ID</li>
                     <li >method name</li>
+                    <li >默认</li>
                     <li >status</li>
                     <li >操作</li>
                 </ul>
@@ -32,6 +33,15 @@
                     <ul class="table_tbody">
                         <li><input type="checkbox" class="delete_box" name="delete[]" value="{{$v['id']}}">{{$v['id']}}</li>
                         <li>{{ $v['name'] }}</li>
+                        <li>
+                            @if($dict['yes_no'])
+                                @if($v->default==1)
+                                    <span class="badge badge-success">{{$dict['yes_no'][$v->default]}}</span>
+                                @else
+                                    <span class="badge badge-secondary">{{$dict['yes_no'][$v->default]}}</span>
+                                @endif
+                            @endif
+                        </li>
                         <li>
                             @if($dict['status'])
                                 @if($v['status']==1)
