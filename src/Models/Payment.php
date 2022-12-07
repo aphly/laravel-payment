@@ -16,16 +16,10 @@ class Payment extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'method_id','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code','cancel_url','ts_id'
+        'method_id','method_name','transaction_id','status','amount','notify_func','success_url','fail_url','currency_code','cancel_url','ts_id'
     ];
 
     //status 1未支付 2已支付
-
-    public function findAll() {
-        return Cache::rememberForever('payment', function () {
-            return self::get()->keyBy('id')->toArray();
-        });
-    }
 
     public $log;
 
@@ -36,9 +30,10 @@ class Payment extends Model
 
     public function make($data)
     {
+        $paymentMethod = PaymentMethod::where('id',$data['method_id'])->where('status',1)->firstOrError();
         $data['amount'] = number_format(floatval($data['amount']),2);
         if($data['amount']>0){
-            $data['method_id'] = $data['method_id']??1;
+            $data['method_name'] = $paymentMethod->name;
             $data['currency_code'] = $data['currency_code']??'USD';
             return Payment::create($data);
         }else{
@@ -49,14 +44,9 @@ class Payment extends Model
     public function pay($redirect = true)
     {
         $this->log->debug('payment_pay start');
-        $method = PaymentMethod::where('id',$this->method_id)->where('status',1)->first();
-        if(!empty($method)){
-            $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-            if (class_exists($class)){
-                (new $class)->pay($this,$redirect);
-            }
-        }else{
-            throw new ApiException(['code'=>1,'msg'=>'payment method error']);
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($this->method_name);
+        if (class_exists($class)){
+            (new $class)->pay($this,$redirect);
         }
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('payment', function (Blueprint $table){
             $table->id();
             $table->integer('method_id');
+            $table->string('method_name',32);
             $table->string('ts_id',128)->nullable();
             $table->string('transaction_id',128)->nullable();
             $table->string('notify_func',255);
