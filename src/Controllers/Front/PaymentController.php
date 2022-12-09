@@ -55,7 +55,19 @@ class PaymentController extends Controller
         }
     }
 
-
+    public function refund(Request $request)
+    {
+        $payment = Payment::where(['id'=>$request->query('payment_id')])->first();
+        if(!empty($payment)){
+            $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->first();
+            if(!empty($method)){
+                $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+                if (class_exists($class)) {
+                    (new $class)->refund($payment);
+                }
+            }
+        }
+    }
 
 
 }
