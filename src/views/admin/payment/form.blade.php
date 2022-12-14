@@ -17,13 +17,13 @@
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
-                <label for="">ts_id</label>
-                <input type="text" readonly class="form-control " value="{{$res['info']->ts_id??0}}">
+                <label for="">transaction_id</label>
+                <input type="text" readonly class="form-control " value="{{$res['info']->transaction_id??0}}">
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
-                <label for="">transaction_id</label>
-                <input type="text" readonly class="form-control " value="{{$res['info']->transaction_id??0}}">
+                <label for="">cred_id</label>
+                <input type="text" readonly class="form-control " value="{{$res['info']->cred_id??0}}">
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">

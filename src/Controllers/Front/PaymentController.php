@@ -20,52 +20,40 @@ class PaymentController extends Controller
     public function notify(Request $request)
     {
         $this->log->debug('payment_notify start '.$request->header('host'));
-        $method = PaymentMethod::where('name',$request->method_name)->where('status',1)->first();
-        if(!empty($method)){
-            $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-            if (class_exists($class)) {
-                (new $class)->notify($method->id);
-            }
+        $method = PaymentMethod::where('name',$request->method_name)->where('status',1)->firstOrError();
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+        if (class_exists($class)) {
+            (new $class)->notify($method->id);
         }
     }
 
     public function return(Request $request)
     {
         $this->log->debug('payment_return start');
-        $method = PaymentMethod::where('name',$request->method_name)->where('status',1)->first();
-        if(!empty($method)){
-            $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-            if (class_exists($class)) {
-                (new $class)->return($method->id);
-            }
+        $method = PaymentMethod::where('name',$request->method_name)->where('status',1)->firstOrError();
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+        if (class_exists($class)) {
+            (new $class)->return($method->id);
         }
     }
 
     public function show(Request $request)
     {
-        $payment = Payment::where(['id'=>$request->query('payment_id')])->first();
-        if(!empty($payment)){
-            $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->first();
-            if(!empty($method)){
-                $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-                if (class_exists($class)) {
-                    (new $class)->show($payment);
-                }
-            }
+        $payment = Payment::where(['id'=>$request->query('payment_id')])->firstOrError();
+        $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->firstOrError();
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+        if (class_exists($class)) {
+            (new $class)->show($payment);
         }
     }
 
     public function refund(Request $request)
     {
-        $payment = Payment::where(['id'=>$request->query('payment_id')])->first();
-        if(!empty($payment)){
-            $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->first();
-            if(!empty($method)){
-                $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-                if (class_exists($class)) {
-                    (new $class)->refund($payment);
-                }
-            }
+        $payment = Payment::where(['id'=>$request->input('payment_id')])->firstOrError();
+        $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->firstOrError();
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+        if (class_exists($class)) {
+            (new $class)->refund($payment);
         }
     }
 

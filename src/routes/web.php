@@ -20,6 +20,7 @@ Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
         Route::get('return/{method_name}', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@return');
         Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@show');
+        Route::post('refund', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@refund');
     });
 });
 

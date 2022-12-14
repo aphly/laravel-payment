@@ -58,7 +58,7 @@ class Stripe
             if($checkoutSession->id){
                 $this->log->debug('payment_stripe pay create '.$checkoutSession->id);
                 $pay_url = $checkoutSession->url;
-                $payment->ts_id = $checkoutSession->id;
+                $payment->transaction_id = $checkoutSession->id;
                 $payment->save();
                 if($redirect){
                     redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$checkoutSession->id), 60)->send();
@@ -95,19 +95,19 @@ class Stripe
             $payment_token = decrypt($_COOKIE["payment_token"]);
         }
         if($payment_token){
-            list($payment_id,$ts_id) = explode(',',$payment_token);
+            list($payment_id,$transaction_id) = explode(',',$payment_token);
             $this->log->debug('payment_stripe return start',request()->all());
             $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
-            if(!empty($payment) && $ts_id==$payment->ts_id){
+            if(!empty($payment) && $transaction_id==$payment->transaction_id){
                 if($payment->status==1){
                     $stripe = new StripeClient($this->sk);
-                    $sessions = $stripe->checkout->sessions->retrieve($ts_id,[]);
+                    $sessions = $stripe->checkout->sessions->retrieve($transaction_id,[]);
                     $this->log->debug('payment_stripe return show');
                     $this->log->debug($sessions);
                     if(isset($sessions) && $sessions->status=='complete'){
                         $payment->status=2;
                         $payment->notify_type='return';
-                        $payment->transaction_id=$sessions->payment_intent;
+                        $payment->cred_id=$sessions->payment_intent;
                         if($payment->save() && $payment->notify_func){
                             $this->callBack($payment->notify_func,$payment,true);
                         }
@@ -162,11 +162,11 @@ class Stripe
                     if(!empty($payment)){
                         if($payment->status>1){
                             $this->log->debug('payment_stripe notify completed status>1');
-                        }else if($payment->status==1 && $payment->ts_id==$session->id){
+                        }else if($payment->status==1 && $payment->transaction_id==$session->id){
                             $this->log->debug('payment_stripe notify completed status==1');
                             $payment->status=2;
                             $payment->notify_type='notify';
-                            $payment->transaction_id=$session->payment_intent;
+                            $payment->cred_id=$session->payment_intent;
                             if($payment->save() && $payment->notify_func){
                                 $this->callBack($payment->notify_func,$payment,true);
                             }
@@ -189,9 +189,21 @@ class Stripe
     public function show($payment)
     {
         $stripe = new StripeClient($this->sk);
-        $sessions = $stripe->checkout->sessions->retrieve($payment->ts_id,[]);
+        $sessions = $stripe->checkout->sessions->retrieve($payment->transaction_id,[]);
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$sessions]]);
     }
 
-
+    public function refund($payment){
+        $request = request();
+        $refund_amount = floatval($request->input('amount',0));
+        $reason = $request->input('reason','');
+        $invoiceId = $request->input('invoiceId','');
+        $amount = ($refund_amount<=$payment->amount)?$refund_amount:false;
+        if($amount){
+            $info = '';
+            throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
+        }else{
+            throw new ApiException(['code'=>1,'msg'=>'refund amount error']);
+        }
+    }
 }

@@ -5,6 +5,7 @@ namespace Aphly\LaravelPayment\Controllers\Admin;
 use Aphly\Laravel\Exceptions\ApiException;
 use Aphly\LaravelPayment\Models\PaymentMethod;
 use Aphly\LaravelPayment\Models\Payment;
+use Aphly\LaravelPayment\Models\PaymentRefund;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -45,6 +46,21 @@ class PaymentController extends Controller
     public function save(Request $request){
         Payment::updateOrCreate(['id'=>$request->query('id',0)],$request->all());
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
+    }
+
+    public function refund(Request $request){
+        $input = $request->all();
+        $res['info'] = Payment::where('id',$input['payment_id'])->firstOrError();
+        if($request->isMethod('post')){
+            if($res['info']->amount >= $input['amount']){
+                $input['status'] = 1;
+                PaymentRefund::create($input);
+                throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
+            }
+            throw new ApiException(['code'=>1,'msg'=>'fail','data'=>['redirect'=>$this->index_url]]);
+        }else{
+            return $this->makeView('laravel-payment::admin.payment.refund',['res'=>$res]);
+        }
     }
 
     public function del(Request $request)

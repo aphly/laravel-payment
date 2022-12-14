@@ -14,11 +14,11 @@ return new class extends Migration
     public function up()
     {
         Schema::create('payment', function (Blueprint $table){
-            $table->id();
+            $table->char('id',32)->primary();
             $table->integer('method_id');
             $table->string('method_name',32);
-            $table->string('ts_id',128)->nullable();
             $table->string('transaction_id',128)->nullable();
+            $table->string('cred_id',128)->nullable();
             $table->string('notify_func',255);
             $table->string('success_url',255);
             $table->string('fail_url',255);
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->char('currency_code',3)->nullable()->default('USD');
             $table->unsignedBigInteger('created_at');
             $table->unsignedBigInteger('updated_at');
-            $table->index(['method_id','ts_id']);
+            $table->index(['method_id','transaction_id']);
         });
     }
 
