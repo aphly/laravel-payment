@@ -31,9 +31,6 @@ class RefundController extends Controller
 
     public function save(Request $request){
         $input = $request->all();
-        if($input['default']==1){
-            PaymentRefund::whereRaw('1')->update(['default'=>2]);
-        }
         PaymentRefund::updateOrCreate(['id'=>$request->query('id',0)],$input);
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
     }

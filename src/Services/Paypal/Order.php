@@ -42,14 +42,13 @@ class Order
         return $response->json();
     }
 
-    public function refund(string $captureId, float $amount, string $currency = 'GBP', string $reason = '', string $invoiceId = ''){
+    public function refund(string $captureId, float $amount, string $currency = 'USD', string $reason = ''){
         $response = $this->client->http('payments/captures/' . $captureId . '/refund','post', array_filter([
             'amount' => [
                 'value' => $amount,
                 'currency_code' => $currency,
             ],
-            'note_to_payer' => $reason,
-            'invoice_id' => $invoiceId,
+            'note_to_payer' => $reason
         ]));
         return $response->json();
     }

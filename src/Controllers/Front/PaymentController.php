@@ -36,26 +36,26 @@ class PaymentController extends Controller
             (new $class)->return($method->id);
         }
     }
-
-    public function show(Request $request)
-    {
-        $payment = Payment::where(['id'=>$request->query('payment_id')])->firstOrError();
-        $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->firstOrError();
-        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-        if (class_exists($class)) {
-            (new $class)->show($payment);
-        }
-    }
-
-    public function refund(Request $request)
-    {
-        $payment = Payment::where(['id'=>$request->input('payment_id')])->firstOrError();
-        $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->firstOrError();
-        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
-        if (class_exists($class)) {
-            (new $class)->refund($payment);
-        }
-    }
+//
+//    public function show(Request $request)
+//    {
+//        $payment = Payment::where(['id'=>$request->query('payment_id')])->firstOrError();
+//        $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->firstOrError();
+//        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+//        if (class_exists($class)) {
+//            (new $class)->show($payment);
+//        }
+//    }
+//
+//    public function refund(Request $request)
+//    {
+//        $payment = Payment::where(['id'=>$request->input('payment_id')])->firstOrError();
+//        $method = PaymentMethod::where('id',$payment->method_id)->where('status',1)->firstOrError();
+//        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
+//        if (class_exists($class)) {
+//            (new $class)->refund($payment);
+//        }
+//    }
 
 
 }

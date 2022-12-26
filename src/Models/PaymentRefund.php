@@ -8,12 +8,12 @@ use Aphly\Laravel\Models\Model;
 class PaymentRefund extends Model
 {
     use HasFactory;
-    protected $table = 'payment';
+    protected $table = 'payment_refund';
     protected $primaryKey = 'id';
     //public $timestamps = false;
 
     protected $fillable = [
-        'payment_id','amount','status'
+        'payment_id','amount','status','reason'
     ];
 
 

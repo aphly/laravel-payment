@@ -19,8 +19,8 @@ class Paypal
 
     public function pay($payment,$redirect=true)
     {
-        $this->log->debug('payment_paypal pay start');
         if($payment->id){
+            $this->log->debug('payment_paypal pay start');
             $purchaseUnits = [
                 [
                     'amount' => [
@@ -34,12 +34,12 @@ class Paypal
                 'brand_name' => env('APP_NAME'),
                 'shipping_preference' => 'NO_SHIPPING',
                 'user_action' => 'PAY_NOW',
-                'return_url' => url('/payment/return/paypal'),
+                'return_url' => url('/payment/paypal/return'),
                 'cancel_url' => $payment->cancel_url,
             ];
             $res_arr = $this->order->create($purchaseUnits, 'CAPTURE', $applicationContext);
             if($res_arr['id']){
-                $this->log->debug('payment_paypal pay create'.$res_arr['id']);
+                $this->log->debug('payment_paypal pay create paypal_id: '.$res_arr['id']);
                 $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
                 $payment->transaction_id = $res_arr['id'];
                 $payment->save();
@@ -92,6 +92,7 @@ class Paypal
                             $payment->status=2;
                             $payment->notify_type='return';
                             $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
+                            $payment->fee=$capture['purchase_units'][0]['payments']['captures']['0']['seller_receivable_breakdown']['paypal_fee']['value'];
                             if($payment->save() && $payment->notify_func){
                                 $this->callBack($payment->notify_func,$payment,true);
                             }
@@ -142,10 +143,10 @@ class Paypal
                     }
                     throw new ApiException('');
                 }else{
-                    throw new ApiException(['code'=>2,'msg'=>'fail']);
+                    throw new ApiException(['code'=>3,'msg'=>'fail']);
                 }
             }else{
-                throw new ApiException(['code'=>1,'msg'=>'fail']);
+                throw new ApiException(['code'=>2,'msg'=>'fail']);
             }
         }else{
             throw new ApiException(['code'=>-1,'msg'=>'fail']);
@@ -154,21 +155,21 @@ class Paypal
 
     public function show($payment)
     {
-        $info = $this->order->show($payment->transaction_id);
-        throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
+        return $this->order->show($payment->transaction_id);
     }
 
-    public function refund($payment){
-        $request = request();
-        $refund_amount = floatval($request->input('amount',0));
-        $reason = $request->input('reason','');
-        $invoiceId = $request->input('invoiceId','');
-        $amount = ($refund_amount<=$payment->amount)?$refund_amount:false;
-        if($amount){
-            $info = $this->order->refund($payment->cred_id,$amount, $payment->currency, $reason,$invoiceId);
-            throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
+    public function refund($payment,$refund){
+        $refund_res = $this->order->refund($payment->cred_id,$refund->amount, $payment->currency_code, $refund->reason??'');
+        $this->log->debug('payment_paypal refund res',$refund_res);
+        if(isset($refund_res['id'])){
+            $refund->cred_id = $refund_res['id'];
+            $refund->cred_status = $refund_res['status'];
+            if($refund_res['status']=='COMPLETED'){
+                $refund->status = 2;
+            }
+            $refund->save();
         }else{
-            throw new ApiException(['code'=>1,'msg'=>'refund amount error']);
+            throw new ApiException(['code'=>3,'msg'=>'refund res error']);
         }
     }
 

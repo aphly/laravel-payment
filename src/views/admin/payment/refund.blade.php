@@ -1,41 +1,68 @@
 
 <div class="top-bar">
-    <h5 class="nav-title">info</h5>
+    <h5 class="nav-title">refund</h5>
 </div>
 <div class="imain">
-    <form method="post" @if($res['info']->id) action="/payment_admin/method/save?id={{$res['info']->id}}" @else action="/payment_admin/method/save" @endif class="save_form">
+    <div>
+        <ul>
+            <li><span>Payment id</span> : <span>{{$res['info']->id}}</span></li>
+            <li><span>Payment method_name</span> : <span>{{$res['info']->method_name}}</span></li>
+            <li><span>Payment transaction_id</span> : <span>{{$res['info']->transaction_id}}</span></li>
+            <li><span>Payment cred_id</span> : <span>{{$res['info']->cred_id}}</span></li>
+            <li><span>Payment notify_func</span> : <span>{{$res['info']->notify_func}}</span></li>
+            <li><span>Payment success_url</span> : <span>{{$res['info']->success_url}}</span></li>
+            <li><span>Payment fail_url</span> : <span>{{$res['info']->fail_url}}</span></li>
+            <li><span>Payment cancel_url</span> : <span>{{$res['info']->cancel_url}}</span></li>
+            <li><span>Payment status</span> : <span>
+                    @if(isset($dict['payment_status']))
+                        {{$dict['payment_status'][$res['info']->status]}}
+                    @endif
+                </span></li>
+            <li><span>Payment amount</span> : <span>{{$res['info']->amount}}</span></li>
+            <li><span>Payment currency_code</span> : <span>{{$res['info']->currency_code}}</span></li>
+            <li><span>Payment created_at</span> : <span>{{$res['info']->created_at}}</span></li>
+            <li><span>Payment updated_at</span> : <span>{{$res['info']->updated_at}}</span></li>
+        </ul>
+    </div>
+
+    <div>
+        <br>
+        <br>
+        <ul>
+            <li>
+                <span>id</span>
+                <span>amount</span>
+                <span>status</span>
+                <span>cred_id</span>
+                <span>cred_status</span>
+                <span>created_at</span>
+            </li>
+            @foreach($res['paymentRefund'] as $val)
+            <li>
+                <span>{{$val->id}}</span>
+                <span>{{$val->amount}}</span>
+                <span>{{$val->status}}</span>
+                <span>{{$val->cred_id}}</span>
+                <span>{{$val->cred_status}}</span>
+                <span>{{$val->created_at}}</span>
+            </li>
+            @endforeach
+        </ul>
+        <br>
+        <br>
+    </div>
+    <form method="post" @if($res['info']->id) action="/payment_admin/payment/refund?id={{$res['info']->id}}" @else action="/payment_admin/payment/refund" @endif class="save_form">
         @csrf
+        <input type="hidden" name="payment_id" class="form-control " value="{{$res['info']->id}}">
         <div class="">
             <div class="form-info">
-                <label for="">名称</label>
-                <input type="text" name="name" class="form-control " value="{{$res['info']->name}}">
+                <label for="">amount</label>
+                <input type="text" name="amount" class="form-control " value="0">
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-info">
-                <label for="">排序</label>
-                <input type="number" name="sort" class="form-control " value="{{$res['info']->sort??0}}">
-                <div class="invalid-feedback"></div>
-            </div>
-            <div class="form-group">
-                <label for="">默认</label>
-                <select name="default" class="form-control">
-                    @if(isset($dict['yes_no']))
-                        @foreach($dict['yes_no'] as $key=>$val)
-                            <option value="{{$key}}" @if($res['info']->default==$key) selected @endif>{{$val}}</option>
-                        @endforeach
-                    @endif
-                </select>
-                <div class="invalid-feedback"></div>
-            </div>
-            <div class="form-group">
-                <label for="">状态</label>
-                <select name="status"  class="form-control">
-                    @if(isset($dict['status']))
-                        @foreach($dict['status'] as $key=>$val)
-                            <option value="{{$key}}" @if($res['info']->status==$key) selected @endif>{{$val}}</option>
-                        @endforeach
-                    @endif
-                </select>
+                <label for="">reason</label>
+                <input type="text" name="reason" class="form-control " value="">
                 <div class="invalid-feedback"></div>
             </div>
             <button class="btn btn-primary" type="submit">保存</button>

@@ -35,7 +35,7 @@ class Stripe
         if($payment->id){
             $stripe = new StripeClient($this->sk);
             $checkoutSession = $stripe->checkout->sessions->create([
-                'success_url' =>  url('/payment/return/stripe'),
+                'success_url' =>  url('/payment/stripe/return'),
                 'cancel_url' => $payment->cancel_url,
                 'payment_method_types' => ['card'],
                 'mode' => 'payment',
@@ -129,7 +129,7 @@ class Stripe
         }
     }
 
-    function notify($method_id){
+    function notify(){
         \Stripe\Stripe::setApiKey($this->sk);
         $this->log->debug('payment_stripe notify start');
         $payload = @file_get_contents('php://input');
@@ -189,21 +189,22 @@ class Stripe
     public function show($payment)
     {
         $stripe = new StripeClient($this->sk);
-        $sessions = $stripe->checkout->sessions->retrieve($payment->transaction_id,[]);
-        throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$sessions]]);
+        return $stripe->checkout->sessions->retrieve($payment->transaction_id,[]);
     }
 
-    public function refund($payment){
-        $request = request();
-        $refund_amount = floatval($request->input('amount',0));
-        $reason = $request->input('reason','');
-        $invoiceId = $request->input('invoiceId','');
-        $amount = ($refund_amount<=$payment->amount)?$refund_amount:false;
-        if($amount){
-            $info = '';
-            throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
+    public function refund($payment,$refund){
+        $stripe = new StripeClient($this->sk);
+        $refund_res = $stripe->refunds->create(['payment_intent' => $payment->cred_id, 'amount' => $refund->amount]);
+        $this->log->debug('payment_paypal refund res');
+        if(isset($refund_res->id)){
+            $refund->cred_id = $refund_res->id;
+            $refund->cred_status = $refund_res->status;
+            if($refund_res->status=='succeeded'){
+                $refund->status = 2;
+            }
+            $refund->save();
         }else{
-            throw new ApiException(['code'=>1,'msg'=>'refund amount error']);
+            throw new ApiException(['code'=>3,'msg'=>'refund res error']);
         }
     }
 }

@@ -30,7 +30,7 @@ class PaymentController extends Controller
                 function($query,$transaction_id) {
                     return $query->where('transaction_id', $transaction_id);
                 })
-            ->orderBy('id','desc')
+            ->orderBy('created_at','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
         $res['method'] = PaymentMethod::get()->keyBy('id');
         return $this->makeView('laravel-payment::admin.payment.index',['res'=>$res]);
@@ -48,17 +48,22 @@ class PaymentController extends Controller
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
     }
 
+    public function show(Request $request)
+    {
+        $res['info'] = Payment::where('id',$request->query('id',0))->firstOrError();
+        $res['transaction_info'] = $res['info']->show($res['info'],true);
+        dd($res['transaction_info']);
+        return $this->makeView('laravel-payment::admin.payment.show',['res'=>$res]);
+    }
+
     public function refund(Request $request){
         $input = $request->all();
-        $res['info'] = Payment::where('id',$input['payment_id'])->firstOrError();
+        $res['info'] = Payment::where('id',$input['id'])->firstOrError();
         if($request->isMethod('post')){
-            if($res['info']->amount >= $input['amount']){
-                $input['status'] = 1;
-                PaymentRefund::create($input);
-                throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
-            }
-            throw new ApiException(['code'=>1,'msg'=>'fail','data'=>['redirect'=>$this->index_url]]);
+            $res['info']->refund($res['info'],$input);
+            throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
         }else{
+            $res['paymentRefund'] = PaymentRefund::where('payment_id',$res['info']->id)->get();
             return $this->makeView('laravel-payment::admin.payment.refund',['res'=>$res]);
         }
     }

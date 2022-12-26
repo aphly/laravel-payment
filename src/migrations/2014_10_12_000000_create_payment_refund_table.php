@@ -17,6 +17,9 @@ return new class extends Migration
             $table->id();
             $table->char('payment_id',32)->index();
             $table->decimal('amount',15,2);
+            $table->string('reason',255)->nullable();
+            $table->string('cred_id',255)->nullable();
+            $table->string('cred_status',255)->nullable();
             $table->tinyInteger('status')->nullable()->default(1);
             $table->unsignedBigInteger('created_at');
             $table->unsignedBigInteger('updated_at');

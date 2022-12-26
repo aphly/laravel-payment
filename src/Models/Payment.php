@@ -59,4 +59,46 @@ class Payment extends Model
             (new $class)->pay($this,$redirect);
         }
     }
+
+    public function show($payment,$return=false)
+    {
+        $this->log->debug('payment show start');
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
+        if (class_exists($class)){
+            $info = (new $class)->show($payment,$return);
+            if($return){
+                return $info;
+            }
+            throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
+        }
+    }
+
+    public function refund($payment,$data)
+    {
+        //'payment_id','amount','status','reason'
+        $this->log->debug('payment_refund start');
+        $paymentRefund = PaymentRefund::where('payment_id',$payment->id)->where('status',2)->get();
+        $refund_total = $data['amount'];
+        foreach ($paymentRefund as $val){
+            $refund_total += $val['amount'];
+        }
+        if($refund_total<=$payment->amount){
+            $data['status'] = 1;
+            $refund = PaymentRefund::create($data);
+            if($refund->id){
+                $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
+                if (class_exists($class)){
+                    (new $class)->refund($payment,$refund);
+                }else{
+                    throw new ApiException(['code'=>3,'msg'=>'class error']);
+                }
+            }else{
+                throw new ApiException(['code'=>2,'msg'=>'refund error']);
+            }
+        }else{
+            throw new ApiException(['code'=>1,'msg'=>'payment refund amount error']);
+        }
+    }
+
+
 }

@@ -10,6 +10,7 @@
         <div class="search_box ">
             <input type="search" name="id" placeholder="id" autocomplete="false" value="{{$res['search']['id']}}">
             <select name="method_id" >
+                <option value="0">All</option>
                 @foreach($res['method'] as $val)
                 <option value="{{$val->id}}">{{$val->name}}</option>
                 @endforeach
@@ -54,6 +55,8 @@
                         </li>
                         <li>
                             <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/form?id={{$v['id']}}">编辑</a>
+                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/refund?id={{$v['id']}}">退款</a>
+                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/show?id={{$v['id']}}">查看</a>
                         </li>
                     </ul>
                     @endforeach

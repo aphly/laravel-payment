@@ -41,8 +41,8 @@ class InstallController extends Controller
         if($method->id){
             $data=[];
             $data[] =['method_id' => $method->id,'key'=>'environment','val'=>''];
-            $data[] =['method_id' => $method->id,'key'=>'client_id','val'=>'AeUNXihK0N-R7lFPTp8hQ3e-v2lpnfYQfct2jRPb-25P6B2-NNS-xhbFDkFkfbJbDUJqfM7WoB5syu5-'];
-            $data[] =['method_id' => $method->id,'key'=>'secret','val'=>'EMP-lHKO5g1R-2nxmzhmc5sw_cDhyoCPgjIC45nKY1P-viR9hRzN37DpKallBOCTfakKI8jwffBIZVIW'];
+            $data[] =['method_id' => $method->id,'key'=>'client_id','val'=>'AXeCqoXm87DP2phnjdGPvezz9MXESXg9NKq-gOC5zfzS1umTF4KH5p5eJzahBwRCmpPtSs-Qi5hyuwuN'];
+            $data[] =['method_id' => $method->id,'key'=>'secret','val'=>'ELRFtOiwsRfGAG_Zs7-6ezrsirRvl702YWmf-Zg424J4mEfwsM2wmW0SVJwCOET5LDSFxG5W3XlaekYS'];
             DB::table('payment_method_params')->insert($data);
         }
 

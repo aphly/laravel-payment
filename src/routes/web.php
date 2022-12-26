@@ -18,9 +18,9 @@ Route::post('payment/{method_name}/notify', 'Aphly\LaravelPayment\Controllers\Fr
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('payment')->group(function () {
-        Route::get('return/{method_name}', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@return');
-        Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@show');
-        Route::post('refund', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@refund');
+        Route::get('{method_name}/return', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@return');
+        //Route::get('show', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@show');
+        //Route::post('refund', 'Aphly\LaravelPayment\Controllers\Front\PaymentController@refund');
     });
 });
 
@@ -42,6 +42,8 @@ Route::middleware(['web'])->group(function () {
                 Route::post('/'.$val[0].'/del', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@del');
             }
 
+            Route::match(['get', 'post'],'/payment/refund', 'Aphly\LaravelPayment\Controllers\Admin\PaymentController@refund');
+            Route::match(['get', 'post'],'/payment/show', 'Aphly\LaravelPayment\Controllers\Admin\PaymentController@show');
         });
     });
 
