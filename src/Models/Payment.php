@@ -51,12 +51,17 @@ class Payment extends Model
         }
     }
 
-    public function pay($redirect = true)
+    public function pay($redirect = true,$id=false)
     {
         $this->log->debug('payment_pay start');
-        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($this->method_name);
+        if($id){
+            $info = Payment::where('id',$id)->where('status',1)->firstOrError();
+        }else{
+            $info = $this;
+        }
+        $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($info->method_name);
         if (class_exists($class)){
-            (new $class)->pay($this,$redirect);
+            (new $class)->pay($info,$redirect);
         }
     }
 
@@ -100,5 +105,12 @@ class Payment extends Model
         }
     }
 
+    public function cancel($payment_id,$amount)
+    {
+        $data['amount'] = $amount;
+        $data['reason'] = 'cancel';
+        $payment = Payment::where('id',$payment_id)->where('status',2)->firstOrError();
+        $this->refund($payment,$data);
+    }
 
 }

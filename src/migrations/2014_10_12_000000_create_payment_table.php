@@ -26,6 +26,7 @@ return new class extends Migration
             $table->tinyInteger('status')->nullable()->default(1);
             $table->string('notify_type')->nullable();
             $table->decimal('amount',15,2);
+            $table->decimal('fee',15,2)->nullable();
             $table->char('currency_code',3)->nullable()->default('USD');
             $table->unsignedBigInteger('created_at');
             $table->unsignedBigInteger('updated_at');
