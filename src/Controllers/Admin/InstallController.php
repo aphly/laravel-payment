@@ -37,7 +37,7 @@ class InstallController extends Controller
         }
         DB::table('admin_role_menu')->insert($data);
 
-        $method = PaymentMethod::create(['name' => 'paypal','status'=>1]);
+        $method = PaymentMethod::create(['name' => 'paypal','status'=>1,'default'=>1]);
         if($method->id){
             $data=[];
             $data[] =['method_id' => $method->id,'key'=>'environment','val'=>''];
@@ -46,7 +46,7 @@ class InstallController extends Controller
             DB::table('payment_method_params')->insert($data);
         }
 
-        $method = PaymentMethod::create(['name' => 'stripe','status'=>1]);
+        $method = PaymentMethod::create(['name' => 'stripe','status'=>1,'default'=>2]);
         if($method->id){
             $data=[];
             $data[] =['method_id' => $method->id,'key'=>'pk','val'=>'pk_test_51Lev4CB2u33uLmOKX6Wn0dUevviRypd7bb1vTwH4q9AcCjT9yxFGVBMLWQrKrL7qA0DNoHrfKzL2w4Qmvp0I9LqJ00MGHJAEJ7'];
@@ -58,8 +58,8 @@ class InstallController extends Controller
         $dict = Dict::create(['name' => '支付状态','key'=>'payment_status','module_id'=>$this->module_id]);
         if($dict->id){
             $data=[];
-            $data[] =['dict_id' => $dict->id,'name'=>'未支付','value'=>'1','fixed'=>'0'];
-            $data[] =['dict_id' => $dict->id,'name'=>'已支付','value'=>'2','fixed'=>'0'];
+            $data[] =['dict_id' => $dict->id,'name'=>'未支付','value'=>'1'];
+            $data[] =['dict_id' => $dict->id,'name'=>'已支付','value'=>'2'];
             DB::table('admin_dict_value')->insert($data);
         }
         return 'install_ok';
