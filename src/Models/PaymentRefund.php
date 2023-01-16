@@ -13,7 +13,7 @@ class PaymentRefund extends Model
     //public $timestamps = false;
 
     protected $fillable = [
-        'payment_id','amount','status','reason'
+        'payment_id','amount','amount_format','status','reason'
     ];
 
 
