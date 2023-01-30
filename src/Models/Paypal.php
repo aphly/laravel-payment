@@ -92,7 +92,7 @@ class Paypal
                             $payment->status=2;
                             $payment->notify_type='return';
                             $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
-                            $payment->fee=$capture['purchase_units'][0]['payments']['captures']['0']['seller_receivable_breakdown']['paypal_fee']['value'];
+                            //$payment->fee=$capture['purchase_units'][0]['payments']['captures']['0']['seller_receivable_breakdown']['paypal_fee']['value'];
                             if($payment->save() && $payment->notify_func){
                                 $this->callBack($payment->notify_func,$payment,true);
                             }

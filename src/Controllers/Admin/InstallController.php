@@ -62,6 +62,14 @@ class InstallController extends Controller
             $data[] =['dict_id' => $dict->id,'name'=>'已支付','value'=>'2'];
             DB::table('admin_dict_value')->insert($data);
         }
+
+        $dict = Dict::create(['name' => '支付退款状态','key'=>'payment_refund_status','module_id'=>$this->module_id]);
+        if($dict->id){
+            $data=[];
+            $data[] =['dict_id' => $dict->id,'name'=>'等待退款','value'=>'1'];
+            $data[] =['dict_id' => $dict->id,'name'=>'退款成功','value'=>'2'];
+            DB::table('admin_dict_value')->insert($data);
+        }
         return 'install_ok';
     }
     public function uninstall(){

@@ -46,7 +46,7 @@ class Stripe
                         'quantity' => 1,
                         'price_data' => [
                             'currency' => 'usd',
-                            'unit_amount' => $payment->amount*100,
+                            'unit_amount' => intval($payment->amount*100),
                             'product_data' => [
                                 'name' => 'Payment_name',
                                 'description' => 'Payment_description',
@@ -194,7 +194,8 @@ class Stripe
 
     public function refund($payment,$refund){
         $stripe = new StripeClient($this->sk);
-        $refund_res = $stripe->refunds->create(['payment_intent' => $payment->cred_id, 'amount' => $refund->amount]);
+        $amount = intval($refund->amount*100);
+        $refund_res = $stripe->refunds->create(['payment_intent' => $payment->cred_id, 'amount' => $amount]);
         $this->log->debug('payment_paypal refund res');
         if(isset($refund_res->id)){
             $refund->cred_id = $refund_res->id;

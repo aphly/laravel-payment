@@ -56,7 +56,7 @@
                         <li>
                             <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/form?id={{$v['id']}}">编辑</a>
                             <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/refund?id={{$v['id']}}">退款</a>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/show?id={{$v['id']}}">查看</a>
+                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/show?id={{$v['id']}}">支付平台数据</a>
                         </li>
                     </ul>
                     @endforeach

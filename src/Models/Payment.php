@@ -90,7 +90,7 @@ class Payment extends Model
         }
         if($refund_total<=$payment->amount){
             $data['status'] = 1;
-            $data['amount_format'] = Currency::codeFormat($data['amount'],$payment->currency_code);
+            list(,$data['amount_format']) = Currency::codeFormat($data['amount'],$payment->currency_code);
             $refund = PaymentRefund::create($data);
             if($refund->id){
                 $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
@@ -103,17 +103,21 @@ class Payment extends Model
                 throw new ApiException(['code'=>2,'msg'=>'refund error']);
             }
         }else{
-            throw new ApiException(['code'=>1,'msg'=>'payment refund amount error'.$refund_total.' '.$payment->amount]);
+            throw new ApiException(['code'=>1,'msg'=>'refund amount error'.$refund_total.'||'.$payment->amount]);
         }
     }
 
-    public function cancel($payment_id,$amount)
+    public function refund_api($payment_id,$amount,$reason=false)
     {
-        $data['amount'] = $amount;
-        $data['reason'] = 'Customer cancel';
-        $payment = Payment::where('id',$payment_id)->where('status',2)->firstOrError();
-        $data['payment_id'] = $payment_id;
-        $this->refund($payment,$data);
+        if($amount>0){
+            $data['amount'] = $amount;
+            $data['reason'] = $reason??'refund';
+            $payment = Payment::where('id',$payment_id)->where('status',2)->firstOrError();
+            $data['payment_id'] = $payment_id;
+            $this->refund($payment,$data);
+        }else{
+            throw new ApiException(['code'=>1,'msg'=>'cancel refund amount error']);
+        }
     }
 
 }

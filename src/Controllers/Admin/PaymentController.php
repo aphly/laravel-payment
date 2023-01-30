@@ -52,7 +52,6 @@ class PaymentController extends Controller
     {
         $res['info'] = Payment::where('id',$request->query('id',0))->firstOrError();
         $res['transaction_info'] = $res['info']->show($res['info'],true);
-        dd($res['transaction_info']);
         return $this->makeView('laravel-payment::admin.payment.show',['res'=>$res]);
     }
 
