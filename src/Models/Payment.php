@@ -120,4 +120,17 @@ class Payment extends Model
         }
     }
 
+
+    public function return_redirect($url,$msg=false)
+    {
+        if($msg){
+            $msg = urlencode($msg);
+            if(!str_contains($url, '?')){
+                $url.='?msg='.$msg;
+            }else{
+                $url.='&msg='.$msg;
+            }
+        }
+        redirect($url)->send();
+    }
 }

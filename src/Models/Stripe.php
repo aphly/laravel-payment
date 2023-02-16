@@ -73,18 +73,14 @@ class Stripe
         }
     }
 
-    public function callBack($classfunc,$payment,$notify=false)
+    public function callBack($classfunc,$payment)
     {
-        if($notify){
-            if($classfunc && $payment){
-                list($class,$func) = explode('@',$classfunc);
-                if (class_exists($class) && method_exists($class,$func)){
-                    $this->log->debug('payment_stripe notify callBack '.$classfunc);
-                    (new $class)->{$func}($payment);
-                }
+        if($classfunc && $payment){
+            list($class,$func) = explode('@',$classfunc);
+            if (class_exists($class) && method_exists($class,$func)){
+                $this->log->debug('payment_stripe notify callBack '.$classfunc);
+                (new $class)->{$func}($payment);
             }
-        }else{
-            redirect($classfunc.'?payment_id='.$payment->id)->send();
         }
     }
 
@@ -109,17 +105,17 @@ class Stripe
                         $payment->notify_type='return';
                         $payment->cred_id=$sessions->payment_intent;
                         if($payment->save() && $payment->notify_func){
-                            $this->callBack($payment->notify_func,$payment,true);
+                            $this->callBack($payment->notify_func,$payment);
                         }
-                        $this->callBack($payment->success_url,$payment);
+                        $payment->return_redirect($payment->success_url);
                     }else{
                         $this->log->debug('payment_stripe return complete error');
-                        $this->callBack($payment->fail_url,$payment);
+                        $payment->return_redirect($payment->fail_url);
                     }
                 }else if($payment->status>1){
-                    $this->callBack($payment->success_url,$payment);
+                    $payment->return_redirect($payment->success_url);
                 }else{
-                    $this->callBack($payment->fail_url,$payment);
+                    $payment->return_redirect($payment->fail_url);
                 }
             }else{
                 throw new ApiException(['code'=>1,'msg'=>'fail']);
@@ -168,7 +164,7 @@ class Stripe
                             $payment->notify_type='notify';
                             $payment->cred_id=$session->payment_intent;
                             if($payment->save() && $payment->notify_func){
-                                $this->callBack($payment->notify_func,$payment,true);
+                                $this->callBack($payment->notify_func,$payment);
                             }
                         }else{
                             $this->log->debug('payment_stripe notify completed status');

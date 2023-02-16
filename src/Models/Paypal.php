@@ -56,18 +56,14 @@ class Paypal
         }
     }
 
-    public function callBack($classfunc,$payment,$notify=false)
+    public function callBack($classfunc,$payment)
     {
-        if($notify){
-            if($classfunc && $payment){
-                list($class,$func) = explode('@',$classfunc);
-                if (class_exists($class) && method_exists($class,$func)){
-                    $this->log->debug('payment_paypal notify callBack '.$classfunc);
-                    (new $class)->{$func}($payment);
-                }
+        if($classfunc && $payment){
+            list($class,$func) = explode('@',$classfunc);
+            if (class_exists($class) && method_exists($class,$func)){
+                $this->log->debug('payment_paypal notify callBack '.$classfunc);
+                (new $class)->{$func}($payment);
             }
-        }else{
-            redirect($classfunc.'?payment_id='.$payment->id)->send();
         }
     }
 
@@ -92,19 +88,18 @@ class Paypal
                             $payment->status=2;
                             $payment->notify_type='return';
                             $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
-                            //$payment->fee=$capture['purchase_units'][0]['payments']['captures']['0']['seller_receivable_breakdown']['paypal_fee']['value'];
                             if($payment->save() && $payment->notify_func){
-                                $this->callBack($payment->notify_func,$payment,true);
+                                $this->callBack($payment->notify_func,$payment);
                             }
-                            $this->callBack($payment->success_url,$payment);
+                            $payment->return_redirect($payment->success_url);
                         }else{
                             $this->log->debug('payment_paypal return APPROVED to COMPLETED error');
-                            $this->callBack($payment->fail_url,$payment);
+                            $payment->return_redirect($payment->fail_url);
                         }
                     }else if($payment->status>1){
-                        $this->callBack($payment->success_url,$payment);
+                        $payment->return_redirect($payment->success_url);
                     }else{
-                        $this->callBack($payment->fail_url,$payment);
+                        $payment->return_redirect($payment->fail_url);
                     }
                 }else{
                     throw new ApiException(['code'=>1,'msg'=>'fail']);
@@ -139,7 +134,7 @@ class Paypal
                     $payment->notify_type='notify';
                     $payment->cred_id=$input['resource']['id'];
                     if($payment->save() && $payment->notify_func){
-                        $this->callBack($payment->notify_func,$payment,true);
+                        $this->callBack($payment->notify_func,$payment);
                     }
                     throw new ApiException('');
                 }else{
