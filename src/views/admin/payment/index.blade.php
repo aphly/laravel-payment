@@ -66,7 +66,7 @@
                             <button class="badge badge-danger del" type="submit">删除</button>
                         </li>
                         <li >
-                            {{$res['list']->links('laravel-admin::common.pagination')}}
+                            {{$res['list']->links('laravel::admin.pagination')}}
                         </li>
                     </ul>
                 @endif

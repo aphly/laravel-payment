@@ -4,7 +4,7 @@ namespace Aphly\LaravelPayment\Controllers\Admin;
 
 
 
-class Controller extends \Aphly\LaravelAdmin\Controllers\Controller
+class Controller extends \Aphly\Laravel\Controllers\AdminController
 {
     public function __construct()
     {
