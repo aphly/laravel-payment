@@ -84,11 +84,12 @@ class Payment extends Model
         //'payment_id','amount','status','reason'
         $this->log->debug('payment_refund start');
         $paymentRefund = PaymentRefund::where('payment_id',$payment->id)->where('status',2)->get();
-        $refund_total = $data['amount'];
+        $refund_total = 0;
         foreach ($paymentRefund as $val){
             $refund_total += $val['amount'];
         }
-        if($refund_total<=$payment->amount){
+        $refund_total_pd = $data['amount']+$refund_total;
+        if($refund_total_pd<=$payment->amount){
             $data['status'] = 1;
             list(,$data['amount_format']) = Currency::codeFormat($data['amount'],$payment->currency_code);
             $refund = PaymentRefund::create($data);
@@ -103,7 +104,7 @@ class Payment extends Model
                 throw new ApiException(['code'=>2,'msg'=>'refund error']);
             }
         }else{
-            throw new ApiException(['code'=>1,'msg'=>'refund amount error'.$refund_total.'||'.$payment->amount]);
+            throw new ApiException(['code'=>1,'msg'=>'refund amount error 支付金额：'.$payment->amount.'，已退款：'.$refund_total]);
         }
     }
 
