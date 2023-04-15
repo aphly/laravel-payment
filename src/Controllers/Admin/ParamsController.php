@@ -14,7 +14,7 @@ class ParamsController extends Controller
 
     public function index(Request $request){
         $res['method'] = (new PaymentMethod)->getInfo($request);
-        $res['search']['title'] = $title = $request->query('title', false);
+        $res['search']['title'] = $request->query('title', false);
         $res['search']['string'] = http_build_query($request->query());
         $res['list'] = PaymentMethodParams::where('method_id',$res['method']->id)
             ->Paginate(config('admin.perPage'))->withQueryString();

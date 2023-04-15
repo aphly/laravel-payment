@@ -30,20 +30,20 @@ Route::middleware(['web'])->group(function () {
 
         Route::middleware(['rbac'])->group(function () {
 
-            Route::post('/method/install', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@del');
+            Route::post('method/install', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@del');
 
             $route_arr = [
                 ['method','\MethodController'],['payment','\PaymentController'],['params','\ParamsController']
             ];
             foreach ($route_arr as $val){
-                Route::get('/'.$val[0].'/index', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@index');
-                Route::get('/'.$val[0].'/form', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@form');
-                Route::post('/'.$val[0].'/save', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@save');
-                Route::post('/'.$val[0].'/del', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@del');
+                Route::get($val[0].'/index', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@index');
+                Route::get($val[0].'/form', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@form');
+                Route::post($val[0].'/save', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@save');
+                Route::post($val[0].'/del', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@del');
             }
 
-            Route::match(['get', 'post'],'/payment/refund', 'Aphly\LaravelPayment\Controllers\Admin\PaymentController@refund');
-            Route::match(['get', 'post'],'/payment/show', 'Aphly\LaravelPayment\Controllers\Admin\PaymentController@show');
+            Route::match(['get', 'post'],'payment/refund', 'Aphly\LaravelPayment\Controllers\Admin\PaymentController@refund');
+            Route::match(['get', 'post'],'payment/show', 'Aphly\LaravelPayment\Controllers\Admin\PaymentController@show');
         });
     });
 

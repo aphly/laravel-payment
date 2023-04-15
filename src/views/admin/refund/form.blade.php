@@ -6,12 +6,12 @@
     <form method="post" @if($res['info']->id) action="/payment_admin/method/save?id={{$res['info']->id}}" @else action="/payment_admin/method/save" @endif class="save_form">
         @csrf
         <div class="">
-            <div class="form-info">
+            <div class="form-group">
                 <label for="">名称</label>
                 <input type="text" name="name" class="form-control " value="{{$res['info']->name}}">
                 <div class="invalid-feedback"></div>
             </div>
-            <div class="form-info">
+            <div class="form-group">
                 <label for="">排序</label>
                 <input type="number" name="sort" class="form-control " value="{{$res['info']->sort??0}}">
                 <div class="invalid-feedback"></div>

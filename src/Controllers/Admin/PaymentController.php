@@ -14,19 +14,19 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $res['search']['id'] = $id = $request->query('id',false);
-        $res['search']['method_id'] = $method_id = $request->query('method_id',false);
-        $res['search']['transaction_id'] = $transaction_id = $request->query('transaction_id',false);
+        $res['search']['id'] = $request->query('id',false);
+        $res['search']['method_id'] = $request->query('method_id',false);
+        $res['search']['transaction_id'] = $request->query('transaction_id',false);
         $res['search']['string'] = http_build_query($request->query());
-        $res['list'] = Payment::when($id,
+        $res['list'] = Payment::when($res['search']['id'],
                 function($query,$id) {
                     return $query->where('id',$id);
                 })
-            ->when($method_id,
+            ->when($res['search']['method_id'],
                 function($query,$method_id) {
                     return $query->where('method_id',$method_id);
                 })
-            ->when($transaction_id,
+            ->when($res['search']['transaction_id'],
                 function($query,$transaction_id) {
                     return $query->where('transaction_id', $transaction_id);
                 })
