@@ -3,12 +3,15 @@
 namespace Aphly\LaravelPayment\Controllers\Admin;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\Laravel\Models\Breadcrumb;
 use Aphly\LaravelPayment\Models\PaymentRefund;
 use Illuminate\Http\Request;
 
 class RefundController extends Controller
 {
     public $index_url='/payment_admin/refund/index';
+
+    private $currArr = ['name'=>'退款','key'=>'method'];
 
     public function index(Request $request)
     {
@@ -20,12 +23,26 @@ class RefundController extends Controller
                 })
             ->orderBy('id','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
+        $res['breadcrumb'] = Breadcrumb::render([
+            ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+        ]);
         return $this->makeView('laravel-payment::admin.refund.index',['res'=>$res]);
     }
 
     public function form(Request $request)
     {
         $res['info'] = PaymentRefund::where('id',$request->query('id',0))->firstOrNew();
+        if($res['info']->id){
+            $res['breadcrumb'] = Breadcrumb::render([
+                ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+                ['name'=>'编辑','href'=>'/payment_admin/'.$this->currArr['key'].'/form?id='.$res['info']->id]
+            ]);
+        }else{
+            $res['breadcrumb'] = Breadcrumb::render([
+                ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+                ['name'=>'新增','href'=>'/payment_admin/'.$this->currArr['key'].'/form']
+            ]);
+        }
         return $this->makeView('laravel-payment::admin.refund.form',['res'=>$res]);
     }
 

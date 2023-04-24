@@ -24,18 +24,6 @@ class PaymentMethod extends Model
         });
     }
 
-    function getInfo($request){
-        $method_id = $request->input('method_id',0);
-        if(!$method_id){
-            throw new ApiException(['code'=>1,'msg'=>'fail','data'=>[]]);
-        }
-        $info = self::where('id',$method_id)->first();
-        if(!empty($info)){
-            return $info;
-        }else{
-            throw new ApiException(['code'=>2,'msg'=>'fail','data'=>[]]);
-        }
-    }
 
     function params(){
         return $this->hasMany(PaymentMethodParams::class,'method_id','id');

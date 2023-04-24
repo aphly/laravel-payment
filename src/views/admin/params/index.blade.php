@@ -1,5 +1,5 @@
 <div class="top-bar">
-    <h5 class="nav-title">method - {{$res['method']->name}}</h5>
+    <h5 class="nav-title">{!! $res['breadcrumb'] !!}</h5>
 </div>
 <style>
     .table_scroll .table_header li:nth-child(2),.table_scroll .table_tbody li:nth-child(2){flex: 0 0 300px;}

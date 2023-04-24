@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Controllers\Admin;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\Laravel\Models\Breadcrumb;
 use Aphly\LaravelPayment\Models\PaymentMethod;
 use Aphly\LaravelPayment\Models\Payment;
 use Aphly\LaravelPayment\Models\PaymentRefund;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 class PaymentController extends Controller
 {
     public $index_url='/payment_admin/payment/index';
+
+    private $currArr = ['name'=>'支付','key'=>'method'];
 
     public function index(Request $request)
     {
@@ -33,6 +36,9 @@ class PaymentController extends Controller
             ->orderBy('created_at','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
         $res['method'] = PaymentMethod::get()->keyBy('id');
+        $res['breadcrumb'] = Breadcrumb::render([
+            ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+        ]);
         return $this->makeView('laravel-payment::admin.payment.index',['res'=>$res]);
     }
 
@@ -40,6 +46,17 @@ class PaymentController extends Controller
     {
         $res['info'] = Payment::where('id',$request->query('id',0))->firstOrNew();
         $res['method'] = PaymentMethod::get()->keyBy('id');
+        if($res['info']->id){
+            $res['breadcrumb'] = Breadcrumb::render([
+                ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+                ['name'=>'编辑','href'=>'/payment_admin/'.$this->currArr['key'].'/form?id='.$res['info']->id]
+            ]);
+        }else{
+            $res['breadcrumb'] = Breadcrumb::render([
+                ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+                ['name'=>'新增','href'=>'/payment_admin/'.$this->currArr['key'].'/form']
+            ]);
+        }
         return $this->makeView('laravel-payment::admin.payment.form',['res'=>$res]);
     }
 
@@ -52,6 +69,10 @@ class PaymentController extends Controller
     {
         $res['info'] = Payment::where('id',$request->query('id',0))->firstOrError();
         $res['transaction_info'] = $res['info']->show($res['info'],true);
+        $res['breadcrumb'] = Breadcrumb::render([
+            ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+            ['name'=>'详情','href'=>'/payment_admin/'.$this->currArr['key'].'/show?id='.$res['info']->id]
+        ]);
         return $this->makeView('laravel-payment::admin.payment.show',['res'=>$res]);
     }
 
@@ -63,6 +84,10 @@ class PaymentController extends Controller
             throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);
         }else{
             $res['paymentRefund'] = PaymentRefund::where('payment_id',$res['info']->id)->get();
+            $res['breadcrumb'] = Breadcrumb::render([
+                ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
+                ['name'=>'退款','href'=>'/payment_admin/'.$this->currArr['key'].'/refund?id='.$res['info']->id]
+            ]);
             return $this->makeView('laravel-payment::admin.payment.refund',['res'=>$res]);
         }
     }

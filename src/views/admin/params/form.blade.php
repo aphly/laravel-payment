@@ -1,6 +1,6 @@
 
 <div class="top-bar">
-    <h5 class="nav-title">info</h5>
+    <h5 class="nav-title">{!! $res['breadcrumb'] !!}</h5>
 </div>
 <div class="imain">
     <form method="post" @if($res['info']->id) action="/payment_admin/params/save?method_id={{$res['method']->id}}&id={{$res['info']->id}}" @else action="/payment_admin/params/save?method_id={{$res['method']->id}}" @endif class="save_form">

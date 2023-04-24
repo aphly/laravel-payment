@@ -1,6 +1,6 @@
 
 <div class="top-bar">
-    <h5 class="nav-title">refund</h5>
+    <h5 class="nav-title">{!! $res['breadcrumb'] !!}</h5>
 </div>
 <style>
     .payment_refund li{display: flex;flex-wrap: wrap;margin-bottom: 5px;line-height: 30px;}
