@@ -38,7 +38,7 @@ class Paypal
                 'cancel_url' => $payment->cancel_url,
             ];
             $res_arr = $this->order->create($purchaseUnits, 'CAPTURE', $applicationContext);
-            if($res_arr['id']){
+            if($res_arr && $res_arr['id']){
                 $this->log->debug('payment_paypal pay create paypal_id: '.$res_arr['id']);
                 $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
                 $payment->transaction_id = $res_arr['id'];
@@ -83,7 +83,7 @@ class Paypal
                 if(!empty($payment)){
                     if($payment->status==1){
                         $capture = $this->order->capture($transaction_id);
-                        $this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
+                        //$this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
                         if(isset($capture['status']) && $capture['status']=='COMPLETED'){
                             $payment->status=2;
                             $payment->notify_type='return';

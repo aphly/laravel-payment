@@ -2,9 +2,7 @@
 
 namespace Aphly\LaravelPayment\Controllers\Front;
 
-use Aphly\Laravel\Exceptions\ApiException;
 use Aphly\LaravelPayment\Models\PaymentMethod;
-use Aphly\LaravelPayment\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +11,6 @@ class PaymentController extends Controller
     public $log;
 
     function __construct(){
-        parent::__construct();
         $this->log = Log::channel('payment');
     }
 
