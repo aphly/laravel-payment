@@ -1,10 +1,10 @@
 {
-    "name": "aphly/laravel-company",
-    "description": "company for laravel",
+    "name": "aphly/laravel-payment",
+    "description": "payment for laravel",
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Aphly\\LaravelCompany\\": "src/"
+            "Aphly\\LaravelPayment\\": "src/"
         }
     },
     "authors": [
@@ -21,7 +21,7 @@
     "extra": {
         "laravel": {
             "providers": [
-		        "Aphly\\LaravelCompany\\CompanyServiceProvider"
+		        "Aphly\\LaravelPayment\\PaymentServiceProvider"
             ]
         }
     }
