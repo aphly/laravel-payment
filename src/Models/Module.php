@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Models\Dict;
+use Aphly\Laravel\Models\Manager;
 use Aphly\Laravel\Models\Menu;
 use Aphly\Laravel\Models\Module as Module_base;
 use Illuminate\Support\Facades\DB;
@@ -13,11 +14,12 @@ class Module extends Module_base
 
     public function install($module_id){
         parent::install($module_id);
-        $menu = Menu::create(['name' => '支付中心','route' =>'','pid'=>0,'type'=>1,'module_id'=>$module_id,'sort'=>10]);
+        $manager = Manager::where('username','admin')->firstOrError();
+        $menu = Menu::create(['name' => '支付中心','route' =>'','pid'=>0,'uuid'=>$manager->uuid,'type'=>1,'module_id'=>$module_id,'sort'=>10]);
         if($menu->id){
             $data=[];
-            $data[] =['name' => '支付方式','route' =>'payment_admin/method/index','pid'=>$menu->id,'type'=>2,'module_id'=>$module_id,'sort'=>0];
-            $data[] =['name' => '流水号','route' =>'payment_admin/payment/index','pid'=>$menu->id,'type'=>2,'module_id'=>$module_id,'sort'=>0];
+            $data[] =['name' => '支付方式','route' =>'payment_admin/method/index','pid'=>$menu->id,'uuid'=>$manager->uuid,'type'=>2,'module_id'=>$module_id,'sort'=>0];
+            $data[] =['name' => '流水号','route' =>'payment_admin/payment/index','pid'=>$menu->id,'uuid'=>$manager->uuid,'type'=>2,'module_id'=>$module_id,'sort'=>0];
             DB::table('admin_menu')->insert($data);
         }
         $menuData = Menu::where(['module_id'=>$module_id])->get();
@@ -45,7 +47,7 @@ class Module extends Module_base
             DB::table('payment_method_params')->insert($data);
         }
 
-        $dict = Dict::create(['name' => '支付状态','key'=>'payment_status','module_id'=>$module_id]);
+        $dict = Dict::create(['name' => '支付状态','uuid'=>$manager->uuid,'key'=>'payment_status','module_id'=>$module_id]);
         if($dict->id){
             $data=[];
             $data[] =['dict_id' => $dict->id,'name'=>'未支付','value'=>'1'];
@@ -53,7 +55,7 @@ class Module extends Module_base
             DB::table('admin_dict_value')->insert($data);
         }
 
-        $dict = Dict::create(['name' => '支付退款状态','key'=>'payment_refund_status','module_id'=>$module_id]);
+        $dict = Dict::create(['name' => '支付退款状态','uuid'=>$manager->uuid,'key'=>'payment_refund_status','module_id'=>$module_id]);
         if($dict->id){
             $data=[];
             $data[] =['dict_id' => $dict->id,'name'=>'等待退款','value'=>'1'];
