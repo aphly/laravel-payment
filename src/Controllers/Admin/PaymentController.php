@@ -17,21 +17,21 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $res['search']['id'] = $request->query('id',false);
-        $res['search']['method_id'] = $request->query('method_id',false);
-        $res['search']['transaction_id'] = $request->query('transaction_id',false);
+        $res['search']['id'] = $request->query('id','');
+        $res['search']['method_id'] = $request->query('method_id','');
+        $res['search']['transaction_id'] = $request->query('transaction_id','');
         $res['search']['string'] = http_build_query($request->query());
-        $res['list'] = Payment::when($res['search']['id'],
-                function($query,$id) {
-                    return $query->where('id',$id);
-                })
-            ->when($res['search']['method_id'],
-                function($query,$method_id) {
-                    return $query->where('method_id',$method_id);
-                })
-            ->when($res['search']['transaction_id'],
-                function($query,$transaction_id) {
-                    return $query->where('transaction_id', $transaction_id);
+        $res['list'] = Payment::when($res['search'],
+                function($query,$search) {
+                    if($search['id']!==''){
+                        $query->where('id',$search['id']);
+                    }
+                    if($search['method_id']!==''){
+                        $query->where('method_id',$search['method_id']);
+                    }
+                    if($search['transaction_id']!==''){
+                        $query->where('transaction_id',$search['transaction_id']);
+                    }
                 })
             ->orderBy('created_at','desc')
             ->Paginate(config('admin.perPage'))->withQueryString();
