@@ -30,8 +30,6 @@ Route::middleware(['web'])->group(function () {
 
         Route::middleware(['rbac'])->group(function () {
 
-            Route::post('method/install', 'Aphly\LaravelPayment\Controllers\Admin\MethodController@del');
-
             $route_arr = [
                 ['method','\MethodController'],['payment','\PaymentController'],['params','\ParamsController']
             ];
