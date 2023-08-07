@@ -81,11 +81,11 @@ class Paypal
                 $this->log->debug('payment_paypal return start',$request->all());
                 $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
                 if(!empty($payment)){
-                    if($payment->status==1){
+                    if($payment->status==0){
                         $capture = $this->order->capture($transaction_id);
                         //$this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
                         if(isset($capture['status']) && $capture['status']=='COMPLETED'){
-                            $payment->status=2;
+                            $payment->status=1;
                             $payment->notify_type='return';
                             $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
                             if($payment->save() && $payment->notify_func){
@@ -96,7 +96,7 @@ class Paypal
                             $this->log->debug('payment_paypal return APPROVED to COMPLETED error');
                             $payment->return_redirect($payment->fail_url);
                         }
-                    }else if($payment->status>1){
+                    }else if($payment->status>0){
                         $payment->return_redirect($payment->success_url);
                     }else{
                         $payment->return_redirect($payment->fail_url);
@@ -130,7 +130,7 @@ class Paypal
                 }
                 $orderShow = $this->order->show($transaction_id);
                 if($orderShow['status']=='COMPLETED'){
-                    $payment->status=2;
+                    $payment->status=1;
                     $payment->notify_type='notify';
                     $payment->cred_id=$input['resource']['id'];
                     if($payment->save() && $payment->notify_func){
@@ -160,7 +160,7 @@ class Paypal
             $refund->cred_id = $refund_res['id'];
             $refund->cred_status = $refund_res['status'];
             if($refund_res['status']=='COMPLETED'){
-                $refund->status = 2;
+                $refund->status = 1;
             }
             $refund->save();
         }else{

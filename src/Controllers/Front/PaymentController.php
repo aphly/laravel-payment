@@ -17,7 +17,7 @@ class PaymentController extends Controller
     public function notify(Request $request)
     {
         $this->log->debug('payment_notify start '.$request->header('host'));
-        $method = PaymentMethod::where('name',$request->method_name)->where('status',1)->firstOrError();
+        $method = PaymentMethod::where('name',$request->method_name)->where('status',0)->firstOrError();
         $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
         if (class_exists($class)) {
             (new $class)->notify($method->id);
@@ -27,7 +27,7 @@ class PaymentController extends Controller
     public function return(Request $request)
     {
         $this->log->debug('payment_return start');
-        $method = PaymentMethod::where('name',$request->method_name)->where('status',1)->firstOrError();
+        $method = PaymentMethod::where('name',$request->method_name)->where('status',0)->firstOrError();
         $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($method->name);
         if (class_exists($class)) {
             (new $class)->return($method->id);

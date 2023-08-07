@@ -51,7 +51,7 @@ class MethodController extends Controller
     public function save(Request $request){
         $input = $request->all();
         if($input['default']==1){
-            PaymentMethod::whereRaw('1')->update(['default'=>2]);
+            PaymentMethod::whereRaw('1')->update(['default'=>0]);
         }
         PaymentMethod::updateOrCreate(['id'=>$request->query('id',0)],$input);
         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$this->index_url]]);

@@ -2,7 +2,6 @@
 
 namespace Aphly\LaravelPayment\Models;
 
-use Aphly\Laravel\Exceptions\ApiException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
 use Illuminate\Support\Facades\Cache;

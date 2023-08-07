@@ -95,13 +95,13 @@ class Stripe
             $this->log->debug('payment_stripe return start',request()->all());
             $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
             if(!empty($payment) && $transaction_id==$payment->transaction_id){
-                if($payment->status==1){
+                if($payment->status==0){
                     $stripe = new StripeClient($this->sk);
                     $sessions = $stripe->checkout->sessions->retrieve($transaction_id,[]);
                     $this->log->debug('payment_stripe return show');
                     $this->log->debug($sessions);
                     if(isset($sessions) && $sessions->status=='complete'){
-                        $payment->status=2;
+                        $payment->status=1;
                         $payment->notify_type='return';
                         $payment->cred_id=$sessions->payment_intent;
                         if($payment->save() && $payment->notify_func){
@@ -112,7 +112,7 @@ class Stripe
                         $this->log->debug('payment_stripe return complete error');
                         $payment->return_redirect($payment->fail_url);
                     }
-                }else if($payment->status>1){
+                }else if($payment->status>0){
                     $payment->return_redirect($payment->success_url);
                 }else{
                     $payment->return_redirect($payment->fail_url);
@@ -156,11 +156,11 @@ class Stripe
                     $payment_id = $session->client_reference_id;
                     $payment = Payment::where(['id'=>$payment_id])->first();
                     if(!empty($payment)){
-                        if($payment->status>1){
-                            $this->log->debug('payment_stripe notify completed status>1');
-                        }else if($payment->status==1 && $payment->transaction_id==$session->id){
+                        if($payment->status>0){
+                            $this->log->debug('payment_stripe notify completed status>0');
+                        }else if($payment->status==0 && $payment->transaction_id==$session->id){
                             $this->log->debug('payment_stripe notify completed status==1');
-                            $payment->status=2;
+                            $payment->status=1;
                             $payment->notify_type='notify';
                             $payment->cred_id=$session->payment_intent;
                             if($payment->save() && $payment->notify_func){
@@ -197,7 +197,7 @@ class Stripe
             $refund->cred_id = $refund_res->id;
             $refund->cred_status = $refund_res->status;
             if($refund_res->status=='succeeded'){
-                $refund->status = 2;
+                $refund->status = 1;
             }
             $refund->save();
         }else{

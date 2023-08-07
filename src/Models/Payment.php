@@ -56,7 +56,7 @@ class Payment extends Model
     {
         $this->log->debug('payment_pay start');
         if($id){
-            $info = Payment::where('id',$id)->where('status',1)->firstOrError();
+            $info = Payment::where('id',$id)->where('status',0)->firstOrError();
         }else{
             $info = $this;
         }
@@ -83,14 +83,14 @@ class Payment extends Model
     {
         //'payment_id','amount','status','reason'
         $this->log->debug('payment_refund start');
-        $paymentRefund = PaymentRefund::where('payment_id',$payment->id)->where('status',2)->get();
+        $paymentRefund = PaymentRefund::where('payment_id',$payment->id)->where('status',1)->get();
         $refund_total = 0;
         foreach ($paymentRefund as $val){
             $refund_total += $val['amount'];
         }
         $refund_total_pd = $data['amount']+$refund_total;
         if($refund_total_pd<=$payment->amount){
-            $data['status'] = 1;
+            $data['status'] = 0;
             list(,$data['amount_format']) = Currency::codeFormat($data['amount'],$payment->currency_code);
             $refund = PaymentRefund::create($data);
             if($refund->id){
@@ -113,7 +113,7 @@ class Payment extends Model
         if($amount>0){
             $data['amount'] = $amount;
             $data['reason'] = $reason??'refund';
-            $payment = Payment::where('id',$payment_id)->where('status',2)->firstOrError();
+            $payment = Payment::where('id',$payment_id)->where('status',1)->firstOrError();
             $data['payment_id'] = $payment_id;
             $this->refund($payment,$data);
         }else{
