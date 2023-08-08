@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('payment_refund', function (Blueprint $table){
             $table->id();
-            $table->char('payment_id',32)->index();
+            $table->unsignedBigInteger('payment_id')->index();
             $table->decimal('amount',15,2);
             $table->string('amount_format',255);
             $table->string('reason',255)->nullable();

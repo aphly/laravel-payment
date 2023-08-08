@@ -17,10 +17,14 @@ class PaymentMethod extends Model
         'name','sort','status','default'
     ];
 
-    public function findAll() {
-        return Cache::rememberForever('payment_method', function () {
+    public function findAll($cache=true) {
+        if($cache){
+            return Cache::rememberForever('payment_method', function () {
+                return self::where(['status'=>1])->orderBy('sort','desc')->get()->keyBy('id')->toArray();
+            });
+        }else{
             return self::where(['status'=>1])->orderBy('sort','desc')->get()->keyBy('id')->toArray();
-        });
+        }
     }
 
 

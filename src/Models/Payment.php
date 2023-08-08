@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\Laravel\Libs\Snowflake;
 use Aphly\LaravelCommon\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
@@ -12,8 +13,8 @@ class Payment extends Model
 {
     use HasFactory;
     protected $table = 'payment';
-    protected $primaryKey = 'id';
-    protected $keyType = 'string';
+    //protected $primaryKey = 'id';
+    //protected $keyType = 'string';
     public $incrementing = false;
     //public $timestamps = false;
 
@@ -22,11 +23,12 @@ class Payment extends Model
     ];
 
     function orderId($md5 = true){
-        if($md5){
-            return md5(uniqid(mt_rand(), true));
-        }else{
-            return date('Ymd').substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
-        }
+        return Snowflake::incrId('payment');
+//        if($md5){
+//            return md5(uniqid(mt_rand(), true));
+//        }else{
+//            return date('Ymd').substr(implode(NULL, array_map('ord', str_split(substr(uniqid(), 7, 13), 1))), 0, 8);
+//        }
     }
 
     //status 1未支付 2已支付
@@ -70,12 +72,12 @@ class Payment extends Model
     {
         $this->log->debug('payment show start');
         $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
-        if (class_exists($class)){
-            $info = (new $class)->show($payment,$return);
-            if($return){
+        if (class_exists($class)) {
+            $info = (new $class)->show($payment, $return);
+            if ($return) {
                 return $info;
             }
-            throw new ApiException(['code'=>0,'msg'=>'success','data'=>['info'=>$info]]);
+            throw new ApiException(['code' => 0, 'msg' => 'success', 'data' => ['info' => $info]]);
         }
     }
 

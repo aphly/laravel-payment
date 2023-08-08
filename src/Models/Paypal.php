@@ -125,7 +125,7 @@ class Paypal
             $invoice_id = $input['resource']['invoice_id'];
             $payment = Payment::where(['transaction_id'=>$transaction_id,'id'=>$invoice_id])->first();
             if(!empty($payment)){
-                if($payment->status!=1){
+                if($payment->status>0){
                     throw new ApiException('');
                 }
                 $orderShow = $this->order->show($transaction_id);

@@ -17,10 +17,14 @@ class PaymentMethodParams extends Model
         'key','val','method_id'
     ];
 
-    public function findAll() {
-        return Cache::rememberForever('payment_method_params', function () {
+    public function findAll($cache=true) {
+        if($cache){
+            return Cache::rememberForever('payment_method_params', function () {
+                return self::get()->keyBy('id')->toArray();
+            });
+        }else{
             return self::get()->keyBy('id')->toArray();
-        });
+        }
     }
 
 
