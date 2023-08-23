@@ -10,6 +10,10 @@ mysql5.7+<br>
 `composer require aphly/laravel-payment` <br>
 `php artisan vendor:publish --provider="Aphly\LaravelPayment\PaymentServiceProvider"` <br>
 
+stripe需要安装包<br>
+`"require": {
+"stripe/stripe-php": "^9.4",
+}`<br>
 
 config/logging.php<br>
 channels 中添加
