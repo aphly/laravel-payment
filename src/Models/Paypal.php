@@ -31,7 +31,7 @@ class Paypal
                 ],
             ];
             $applicationContext = [
-                'brand_name' => env('APP_NAME'),
+                'brand_name' => config('common.hostname'),
                 'shipping_preference' => 'NO_SHIPPING',
                 'user_action' => 'PAY_NOW',
                 'return_url' => url('/payment/paypal/return'),

@@ -14,6 +14,7 @@ stripe需要安装包<br>
 `"require": {
 "stripe/stripe-php": "^9.4",
 }`<br>
+或者 `composer require stripe/stripe-php`<br>
 
 config/logging.php<br>
 channels 中添加

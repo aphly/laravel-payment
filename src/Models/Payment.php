@@ -65,6 +65,8 @@ class Payment extends Model
         $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($info->method_name);
         if (class_exists($class)){
             (new $class)->pay($info,$redirect);
+        }else{
+            throw new ApiException(['code' => 1, 'msg' => 'Class Fail '.$info->method_name]);
         }
     }
 
