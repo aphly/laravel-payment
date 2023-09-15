@@ -97,6 +97,7 @@ class Paypal
                             $payment->return_redirect($payment->fail_url);
                         }
                     }else if($payment->status>0){
+                        $this->log->debug('payment_paypal return status is not 0',$payment->status);
                         $payment->return_redirect($payment->success_url);
                     }else{
                         $payment->return_redirect($payment->fail_url);
@@ -126,6 +127,7 @@ class Paypal
             $payment = Payment::where(['transaction_id'=>$transaction_id,'id'=>$invoice_id])->first();
             if(!empty($payment)){
                 if($payment->status>0){
+                    $this->log->debug('payment_paypal notify status is not 0',$payment->status);
                     throw new ApiException('');
                 }
                 $orderShow = $this->order->show($transaction_id);
