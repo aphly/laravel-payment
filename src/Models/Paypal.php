@@ -89,6 +89,7 @@ class Paypal
                             $payment->notify_type='return';
                             $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
                             if($payment->save() && $payment->notify_func){
+                                $this->log->debug('payment_paypal return ok');
                                 $this->callBack($payment->notify_func,$payment);
                             }
                             $payment->return_redirect($payment->success_url);

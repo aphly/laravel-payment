@@ -105,6 +105,7 @@ class Stripe
                         $payment->notify_type='return';
                         $payment->cred_id=$sessions->payment_intent;
                         if($payment->save() && $payment->notify_func){
+                            $this->log->debug('payment_stripe return ok');
                             $this->callBack($payment->notify_func,$payment);
                         }
                         $payment->return_redirect($payment->success_url);
