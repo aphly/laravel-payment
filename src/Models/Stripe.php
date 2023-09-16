@@ -114,7 +114,7 @@ class Stripe
                         $payment->return_redirect($payment->fail_url);
                     }
                 }else if($payment->status>0){
-                    $this->log->debug('payment_stripe return status is not 0',$payment->status);
+                    $this->log->debug('payment_stripe return status > 0');
                     $payment->return_redirect($payment->success_url);
                 }else{
                     $payment->return_redirect($payment->fail_url);
@@ -159,13 +159,14 @@ class Stripe
                     $payment = Payment::where(['id'=>$payment_id])->first();
                     if(!empty($payment)){
                         if($payment->status>0){
-                            $this->log->debug('payment_stripe notify completed status>0',$payment->status);
+                            $this->log->debug('payment_stripe notify completed status>0');
                         }else if($payment->status==0 && $payment->transaction_id==$session->id){
                             $this->log->debug('payment_stripe notify completed status==1');
                             $payment->status=1;
                             $payment->notify_type='notify';
                             $payment->cred_id=$session->payment_intent;
                             if($payment->save() && $payment->notify_func){
+                                $this->log->debug('payment_stripe notify ok');
                                 $this->callBack($payment->notify_func,$payment);
                             }
                         }else{
