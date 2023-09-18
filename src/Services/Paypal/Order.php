@@ -50,6 +50,6 @@ class Order
             ],
             'note_to_payer' => $reason
         ]));
-        return $response->json();
+        return $response->json()??[];
     }
 }
