@@ -58,6 +58,7 @@ class Paypal
                     throw new ApiException(['code'=>3,'msg'=>'payment save error']);
                 }
             }else{
+                $this->log->debug('payment create error',$res_arr);
                 throw new ApiException(['code'=>2,'msg'=>'payment create error','data'=>$res_arr]);
             }
         }else{
@@ -125,7 +126,7 @@ class Paypal
                 }
             }else{
                 $msg = 'payment_paypal '.$notify_type.' APPROVED to COMPLETED error';
-                $this->log->debug('payment_paypal '.$notify_type.' APPROVED to COMPLETED error');
+                $this->log->debug('payment_paypal '.$notify_type.' APPROVED to COMPLETED error',is_array($capture)?$capture:[]);
                 if($notify_type=='return'){
                     $payment->return_redirect($payment->fail_url);
                 }else{
@@ -134,7 +135,7 @@ class Paypal
             }
         }else{
             $msg = 'payment_paypal '.$notify_type.' show error';
-            $this->log->debug($msg);
+            $this->log->debug($msg,$order_show);
             if($notify_type=='return'){
                 $payment->return_redirect($payment->fail_url);
             }else{
@@ -152,7 +153,7 @@ class Paypal
 //            $payment_token = decrypt($_COOKIE["payment_token"]);
 //        }
         $payment_token = session('payment_token');
-        if($payment_token && 0){
+        if($payment_token){
             list($payment_id,$transaction_id) = explode(',',$payment_token);
             if($transaction_id == $request->query('token')){
                 $this->log->debug('payment_paypal return start',$request->all());
