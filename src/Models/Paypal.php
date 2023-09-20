@@ -42,14 +42,23 @@ class Paypal
                 $this->log->debug('payment_paypal pay create paypal_id: '.$res_arr['id']);
                 $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
                 $payment->transaction_id = $res_arr['id'];
-                $payment->save();
-                if($redirect){
-                    redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$res_arr['id']), 60)->send();
+//                if($redirect){
+//                    redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$res_arr['id']), 60)->send();
+//                }else{
+//                    throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]],cookie('payment_token',$payment->id.','.$res_arr['id'], 60));
+//                }
+                if($payment->save()){
+                    session(['payment_token' => $payment->id.','.$res_arr['id']]);
+                    if($redirect){
+                        redirect($pay_url)->send();
+                    }else{
+                        throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]]);
+                    }
                 }else{
-                    throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]],cookie('payment_token',$payment->id.','.$res_arr['id'], 60));
+                    throw new ApiException(['code'=>3,'msg'=>'payment save error']);
                 }
             }else{
-                throw new ApiException(['code'=>2,'msg'=>'payment create error']);
+                throw new ApiException(['code'=>2,'msg'=>'payment create error','data'=>$res_arr]);
             }
         }else{
             throw new ApiException(['code'=>1,'msg'=>'payment id error']);
@@ -67,35 +76,112 @@ class Paypal
         }
     }
 
+    public function sync($payment)
+    {
+        $this->log->debug('payment_paypal sync start');
+        if(!empty($payment)){
+            if($payment->status==0){
+                $this->handle($payment,'sync');
+            }else if($payment->status>0){
+                $this->log->debug('payment_paypal sync status > 0');
+                throw new ApiException(['code'=>2,'msg'=>'payment_paypal sync status > 0']);
+            }else{
+                throw new ApiException(['code'=>3,'msg'=>'payment_paypal sync fail']);
+            }
+        }else{
+            throw new ApiException(['code'=>4,'msg'=>'fail']);
+        }
+    }
+
+    public function handle($payment,$notify_type){
+        $order_show = $this->order->show($payment->transaction_id);
+        if(isset($order_show['status']) && $order_show['status']=='COMPLETED') {
+            $payment->status = 1;
+            $payment->notify_type = $notify_type;
+            $payment->cred_id = !empty($order_show['purchase_units'][0]['payments']['captures']['0']['id']) ?? '';
+            if ($payment->save() && $payment->notify_func) {
+                $this->log->debug('payment_paypal '.$notify_type.' ok');
+                $this->callBack($payment->notify_func, $payment);
+            }
+            if($notify_type=='return'){
+                $payment->return_redirect($payment->success_url);
+            }else{
+                throw new ApiException(['code' => 0, 'msg' => 'success']);
+            }
+        }else if(isset($order_show['status']) && $order_show['status']=='APPROVED'){
+            $capture = $this->order->capture($payment->transaction_id);
+            if(isset($capture['status']) && $capture['status']=='COMPLETED'){
+                $payment->status=1;
+                $payment->notify_type=$notify_type;
+                $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
+                if($payment->save() && $payment->notify_func){
+                    $this->log->debug('payment_paypal '.$notify_type.' APPROVED ok');
+                    $this->callBack($payment->notify_func,$payment);
+                }
+                if($notify_type=='return'){
+                    $payment->return_redirect($payment->success_url);
+                }else{
+                    throw new ApiException(['code' => 0, 'msg' => 'success']);
+                }
+            }else{
+                $msg = 'payment_paypal '.$notify_type.' APPROVED to COMPLETED error';
+                $this->log->debug('payment_paypal '.$notify_type.' APPROVED to COMPLETED error');
+                if($notify_type=='return'){
+                    $payment->return_redirect($payment->fail_url);
+                }else{
+                    throw new ApiException(['code' => 1, 'msg' => $msg]);
+                }
+            }
+        }else{
+            $msg = 'payment_paypal '.$notify_type.' show error';
+            $this->log->debug($msg);
+            if($notify_type=='return'){
+                $payment->return_redirect($payment->fail_url);
+            }else{
+                throw new ApiException(['code' => 1, 'msg' => $msg]);
+            }
+        }
+    }
+
     public function return($method_id)
     {
         //payment/return?token=7U168763NS774425V&PayerID=5JBR62CD2ZXS4
         $request = request();
-        $payment_token = Cookie::get('payment_token');
-        if(!$payment_token){
-            $payment_token = decrypt($_COOKIE["payment_token"]);
-        }
-        if($payment_token){
+//        $payment_token = Cookie::get('payment_token');
+//        if(!$payment_token){
+//            $payment_token = decrypt($_COOKIE["payment_token"]);
+//        }
+        $payment_token = session('payment_token');
+        if($payment_token && 0){
             list($payment_id,$transaction_id) = explode(',',$payment_token);
             if($transaction_id == $request->query('token')){
                 $this->log->debug('payment_paypal return start',$request->all());
                 $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
                 if(!empty($payment)){
                     if($payment->status==0){
-                        $capture = $this->order->capture($transaction_id);
-                        //$this->log->debug('payment_paypal return APPROVED to COMPLETED',$capture);
+                        $notify_type = 'return';
+                        $capture = $this->order->capture($payment->transaction_id);
                         if(isset($capture['status']) && $capture['status']=='COMPLETED'){
                             $payment->status=1;
-                            $payment->notify_type='return';
+                            $payment->notify_type=$notify_type;
                             $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
                             if($payment->save() && $payment->notify_func){
-                                $this->log->debug('payment_paypal return ok');
+                                $this->log->debug('payment_paypal '.$notify_type.' APPROVED ok');
                                 $this->callBack($payment->notify_func,$payment);
                             }
-                            $payment->return_redirect($payment->success_url);
+                            if($notify_type=='return'){
+                                $payment->return_redirect($payment->success_url);
+                            }else{
+                                throw new ApiException(['code' => 0, 'msg' => 'success']);
+                            }
                         }else{
-                            $this->log->debug('payment_paypal return APPROVED to COMPLETED error');
-                            $payment->return_redirect($payment->fail_url);
+                            $msg = 'payment_paypal '.$notify_type.' APPROVED to COMPLETED error';
+                            $this->log->debug('payment_paypal '.$notify_type.' APPROVED to COMPLETED error');
+                            if($notify_type=='return'){
+                                $payment->return_redirect($payment->fail_url);
+                            }else{
+                                throw new ApiException(['code' => 1, 'msg' => $msg]);
+                            }
                         }
                     }else if($payment->status>0){
                         $this->log->debug('payment_paypal return status > 0');
@@ -132,12 +218,13 @@ class Paypal
                     throw new ApiException('');
                 }
                 $orderShow = $this->order->show($transaction_id);
-                if($orderShow['status']=='COMPLETED'){
-                    $payment->status=1;
-                    $payment->notify_type='notify';
-                    $payment->cred_id=$input['resource']['id'];
-                    if($payment->save() && $payment->notify_func){
-                        $this->callBack($payment->notify_func,$payment);
+                if($orderShow['status']=='COMPLETED') {
+                    $payment->status = 1;
+                    $payment->notify_type = 'notify';
+                    $payment->cred_id=$orderShow['purchase_units'][0]['payments']['captures']['0']['id'];
+                    if ($payment->save() && $payment->notify_func) {
+                        $this->log->debug('payment_paypal notify COMPLETED ok');
+                        $this->callBack($payment->notify_func, $payment);
                     }
                     throw new ApiException('');
                 }else{

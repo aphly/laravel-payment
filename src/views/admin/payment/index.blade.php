@@ -46,7 +46,7 @@
                         </li>
                         <li>
                             @if($dict['payment_status'])
-                                @if($v->status==2)
+                                @if($v->status==1)
                                     <span class="badge badge-success">{{$dict['payment_status'][$v->status]}}</span>
                                 @else
                                     <span class="badge badge-secondary">{{$dict['payment_status'][$v->status]}}</span>
@@ -54,9 +54,9 @@
                             @endif
                         </li>
                         <li>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/form?id={{$v['id']}}">编辑</a>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/refund?id={{$v['id']}}">退款</a>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/payment/show?id={{$v['id']}}">支付平台数据</a>
+                            <a class="badge badge-info ajax_html" data-href="/payment_admin/payment/form?id={{$v['id']}}">编辑</a>
+                            <a class="badge badge-info ajax_html" data-href="/payment_admin/payment/refund?id={{$v['id']}}">退款</a>
+                            <a class="badge badge-info ajax_html" data-href="/payment_admin/payment/show?id={{$v['id']}}">支付平台数据</a>
                         </li>
                     </ul>
                     @endforeach

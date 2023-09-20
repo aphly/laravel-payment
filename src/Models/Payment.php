@@ -64,6 +64,7 @@ class Payment extends Model
         }
         $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($info->method_name);
         if (class_exists($class)){
+            $this->log->debug('payment_pay '.$info->method_name.' Payment id '.$info->id);
             (new $class)->pay($info,$redirect);
         }else{
             throw new ApiException(['code' => 1, 'msg' => 'Class Fail '.$info->method_name]);
@@ -125,7 +126,6 @@ class Payment extends Model
         }
     }
 
-
     public function return_redirect($url,$msg=false)
     {
         if($msg){
@@ -137,5 +137,20 @@ class Payment extends Model
             }
         }
         redirect($url)->send();
+    }
+
+    public function sync_api($payment_id)
+    {
+        if($payment_id){
+            $payment = Payment::where('id',$payment_id)->where('status',0)->firstOrError();
+            $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
+            if (class_exists($class)){
+                (new $class)->sync($payment);
+            }else{
+                throw new ApiException(['code'=>3,'msg'=>'class error']);
+            }
+        }else{
+            throw new ApiException(['code'=>1,'msg'=>'cancel refund amount error']);
+        }
     }
 }

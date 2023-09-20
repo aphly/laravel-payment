@@ -38,7 +38,7 @@ class Client
     public function token(){
         if($this->client_id && $this->secret){
             return Cache::remember('paypal_token',7200, function () {
-                $res = Http::withBasicAuth($this->client_id,$this->secret)->asForm()->baseUrl($this->generateBaseUrl(false))->post('v1/oauth2/token',[
+                $res = Http::connectTimeout(10)->withBasicAuth($this->client_id,$this->secret)->asForm()->baseUrl($this->generateBaseUrl(false))->post('v1/oauth2/token',[
                     'grant_type'=>'client_credentials'
                 ])->json();
                 return $res['access_token'];

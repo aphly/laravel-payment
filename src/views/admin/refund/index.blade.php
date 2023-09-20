@@ -13,7 +13,7 @@
         </div>
         </form>
         <div class="">
-            <a class="badge badge-primary ajax_get show_all0_btn" data-href="/payment_admin/method/form">添加</a>
+            <a class="badge badge-primary ajax_html show_all0_btn" data-href="/payment_admin/method/form">添加</a>
         </div>
     </div>
 
@@ -52,8 +52,8 @@
                             @endif
                         </li>
                         <li>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/method/form?id={{$v['id']}}">编辑</a>
-                            <a class="badge badge-info ajax_get" data-href="/payment_admin/params/index?method_id={{$v['id']}}">参数设置</a>
+                            <a class="badge badge-info ajax_html" data-href="/payment_admin/method/form?id={{$v['id']}}">编辑</a>
+                            <a class="badge badge-info ajax_html" data-href="/payment_admin/params/index?method_id={{$v['id']}}">参数设置</a>
                         </li>
                     </ul>
                     @endforeach

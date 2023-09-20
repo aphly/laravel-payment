@@ -59,11 +59,20 @@ class Stripe
                 $this->log->debug('payment_stripe pay create '.$checkoutSession->id);
                 $pay_url = $checkoutSession->url;
                 $payment->transaction_id = $checkoutSession->id;
-                $payment->save();
-                if($redirect){
-                    redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$checkoutSession->id), 60)->send();
+//                if($redirect){
+//                    redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$checkoutSession->id), 60)->send();
+//                }else{
+//                    throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]],cookie('payment_token',$payment->id.','.$checkoutSession->id, 60));
+//                }
+                if($payment->save()){
+                    session(['payment_token' => $payment->id.','.$checkoutSession->id]);
+                    if($redirect){
+                        redirect($pay_url)->send();
+                    }else{
+                        throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]]);
+                    }
                 }else{
-                    throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]],cookie('payment_token',$payment->id.','.$checkoutSession->id, 60));
+                    throw new ApiException(['code'=>3,'msg'=>'payment save error']);
                 }
             }else{
                 throw new ApiException(['code'=>2,'msg'=>'payment create error']);
@@ -84,12 +93,46 @@ class Stripe
         }
     }
 
+    public function sync($payment)
+    {
+        $this->log->debug('payment_stripe sync start');
+        if(!empty($payment)){
+            if($payment->status==0){
+                $stripe = new StripeClient($this->sk);
+                $sessions = $stripe->checkout->sessions->retrieve($payment->transaction_id,[]);
+                $this->log->debug('payment_stripe sync show');
+                $this->log->debug($sessions);
+                if(isset($sessions) && $sessions->status=='complete'){
+                    $payment->status=1;
+                    $payment->notify_type='sync';
+                    $payment->cred_id=$sessions->payment_intent;
+                    if($payment->save() && $payment->notify_func){
+                        $this->log->debug('payment_stripe sync ok');
+                        $this->callBack($payment->notify_func,$payment);
+                    }
+                    throw new ApiException(['code'=>0,'msg'=>'success']);
+                }else{
+                    $this->log->debug('payment_stripe sync complete error');
+                    throw new ApiException(['code'=>1,'msg'=>'payment_stripe sync complete error']);
+                }
+            }else if($payment->status>0){
+                $this->log->debug('payment_stripe sync status > 0');
+                throw new ApiException(['code'=>2,'msg'=>'payment_stripe sync status > 0']);
+            }else{
+                throw new ApiException(['code'=>3,'msg'=>'payment_stripe sync fail']);
+            }
+        }else{
+            throw new ApiException(['code'=>4,'msg'=>'fail']);
+        }
+    }
+
     public function return($method_id)
     {
-        $payment_token = Cookie::get('payment_token');
-        if(!$payment_token){
-            $payment_token = decrypt($_COOKIE["payment_token"]);
-        }
+//        $payment_token = Cookie::get('payment_token');
+//        if(!$payment_token){
+//            $payment_token = decrypt($_COOKIE["payment_token"]);
+//        }
+        $payment_token = session('payment_token');
         if($payment_token){
             list($payment_id,$transaction_id) = explode(',',$payment_token);
             $this->log->debug('payment_stripe return start',request()->all());
