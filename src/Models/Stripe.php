@@ -163,6 +163,7 @@ class Stripe
                     $payment->return_redirect($payment->fail_url);
                 }
             }else{
+                $this->log->debug('payment_stripe return fail '.$transaction_id.'  '.$payment->transaction_id);
                 throw new ApiException(['code'=>1,'msg'=>'fail']);
             }
         }else{

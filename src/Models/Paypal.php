@@ -58,7 +58,7 @@ class Paypal
                     throw new ApiException(['code'=>3,'msg'=>'payment save error']);
                 }
             }else{
-                $this->log->debug('payment create error',$res_arr);
+                $this->log->debug('payment create error',is_array($res_arr)?$res_arr:[]);
                 throw new ApiException(['code'=>2,'msg'=>'payment create error','data'=>$res_arr]);
             }
         }else{
@@ -194,6 +194,7 @@ class Paypal
                     throw new ApiException(['code'=>1,'msg'=>'fail']);
                 }
             }else{
+                $this->log->debug('payment_paypal return token error '.$transaction_id.'  '.$request->query('token'));
                 throw new ApiException(['code'=>-1,'msg'=>'token error']);
             }
         }else{
