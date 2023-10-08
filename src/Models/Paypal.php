@@ -4,7 +4,6 @@ namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
 use Aphly\LaravelPayment\Services\Paypal\Order;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 
 class Paypal
@@ -42,11 +41,6 @@ class Paypal
                 $this->log->debug('payment_paypal pay create paypal_id: '.$res_arr['id']);
                 $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
                 $payment->transaction_id = $res_arr['id'];
-//                if($redirect){
-//                    redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$res_arr['id']), 60)->send();
-//                }else{
-//                    throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]],cookie('payment_token',$payment->id.','.$res_arr['id'], 60));
-//                }
                 if($payment->save()){
                     session(['payment_token' => $payment->id.','.$res_arr['id']]);
                     if($redirect){
@@ -148,10 +142,6 @@ class Paypal
     {
         //payment/return?token=7U168763NS774425V&PayerID=5JBR62CD2ZXS4
         $request = request();
-//        $payment_token = Cookie::get('payment_token');
-//        if(!$payment_token){
-//            $payment_token = decrypt($_COOKIE["payment_token"]);
-//        }
         $payment_token = session('payment_token');
         if($payment_token){
             list($payment_id,$transaction_id) = explode(',',$payment_token);

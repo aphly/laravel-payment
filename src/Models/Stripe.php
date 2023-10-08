@@ -3,7 +3,6 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
 use Stripe\Webhook;
@@ -59,11 +58,6 @@ class Stripe
                 $this->log->debug('payment_stripe pay create '.$checkoutSession->id);
                 $pay_url = $checkoutSession->url;
                 $payment->transaction_id = $checkoutSession->id;
-//                if($redirect){
-//                    redirect($pay_url)->cookie('payment_token', encrypt($payment->id.','.$checkoutSession->id), 60)->send();
-//                }else{
-//                    throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]],cookie('payment_token',$payment->id.','.$checkoutSession->id, 60));
-//                }
                 if($payment->save()){
                     session(['payment_token' => $payment->id.','.$checkoutSession->id]);
                     if($redirect){
@@ -128,10 +122,6 @@ class Stripe
 
     public function return($method_id)
     {
-//        $payment_token = Cookie::get('payment_token');
-//        if(!$payment_token){
-//            $payment_token = decrypt($_COOKIE["payment_token"]);
-//        }
         $payment_token = session('payment_token');
         if($payment_token){
             list($payment_id,$transaction_id) = explode(',',$payment_token);
