@@ -229,7 +229,7 @@ class Stripe
         $stripe = new StripeClient($this->sk);
         $amount = intval($refund->amount*100);
         $refund_res = $stripe->refunds->create(['payment_intent' => $payment->cred_id, 'amount' => $amount]);
-        $this->log->debug('payment_paypal refund res');
+        $this->log->debug('payment_stripe refund res');
         if(isset($refund_res->id)){
             $refund->cred_id = $refund_res->id;
             $refund->cred_status = $refund_res->status;

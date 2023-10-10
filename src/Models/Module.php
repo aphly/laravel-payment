@@ -52,7 +52,7 @@ class Module extends Module_base
             $data=[];
             $data[] =['method_id' => $method->id,'key'=>'pk','val'=>'pk_test_51Lev4CB2u33uLmOKX6Wn0dUevviRypd7bb1vTwH4q9AcCjT9yxFGVBMLWQrKrL7qA0DNoHrfKzL2w4Qmvp0I9LqJ00MGHJAEJ7'];
             $data[] =['method_id' => $method->id,'key'=>'sk','val'=>'sk_test_51Lev4CB2u33uLmOKI6ESGWaTfKiT4zOPZYRDe2yMizTozDQH6tpkuDxmf8uAV21vURIjUOngEnQQdXmSIvrWzb0j003d3rF8IL'];
-            $data[] =['method_id' => $method->id,'key'=>'es','val'=>'whsec_q20KcAiMdAUXZE4xJPIhqGCLcbDMhDbq'];
+            $data[] =['method_id' => $method->id,'key'=>'es','val'=>'whsec_oPr9R31JYElXmcDWiUSjbiAGKwOSXfzO'];
             DB::table('payment_method_params')->insert($data);
         }
 
