@@ -31,6 +31,7 @@ return new class extends Migration
             $table->unsignedBigInteger('created_at');
             $table->unsignedBigInteger('updated_at');
             $table->index(['method_id','transaction_id']);
+            $table->engine = 'InnoDB';
         });
     }
 

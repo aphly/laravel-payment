@@ -4,6 +4,7 @@ namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
 use Aphly\LaravelPayment\Services\Paypal\Order;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class Paypal
@@ -138,7 +139,7 @@ class Paypal
         }
     }
 
-    public function return($method_id)
+    public function return()
     {
         //payment/return?token=7U168763NS774425V&PayerID=5JBR62CD2ZXS4
         $request = request();
@@ -147,41 +148,47 @@ class Paypal
             list($payment_id,$transaction_id) = explode(',',$payment_token);
             if($transaction_id == $request->query('token')){
                 $this->log->debug('payment_paypal return start',$request->all());
-                $payment = Payment::where(['id'=>$payment_id,'method_id'=>$method_id])->first();
-                if(!empty($payment)){
-                    if($payment->status==0){
-                        $notify_type = 'return';
-                        $capture = $this->order->capture($payment->transaction_id);
-                        if(isset($capture['status']) && $capture['status']=='COMPLETED'){
-                            $payment->status=1;
-                            $payment->notify_type=$notify_type;
-                            $payment->cred_id=$capture['purchase_units'][0]['payments']['captures']['0']['id'];
-                            if($payment->save() && $payment->notify_func){
-                                $this->log->debug('payment_paypal '.$notify_type.' APPROVED ok');
-                                $this->callBack($payment->notify_func,$payment);
+                DB::beginTransaction();
+                try {
+                    $payment = Payment::where(['id' => $payment_id])->lockForUpdate()->first();
+                    if (!empty($payment)) {
+                        if ($payment->status == 0) {
+                            $notify_type = 'return';
+                            $capture = $this->order->capture($payment->transaction_id);
+                            if (isset($capture['status']) && $capture['status'] == 'COMPLETED') {
+                                $payment->status = 1;
+                                $payment->notify_type = $notify_type;
+                                $payment->cred_id = $capture['purchase_units'][0]['payments']['captures']['0']['id'];
+                                if ($payment->save() && $payment->notify_func) {
+                                    $this->log->debug('payment_paypal ' . $notify_type . ' APPROVED ok');
+                                    $this->callBack($payment->notify_func, $payment);
+                                }
+                                throw new ApiException(['code'=>99,'msg'=>'success','data'=>['payment'=>$payment]]);
+                            } else {
+                                $msg = 'payment_paypal ' . $notify_type . ' APPROVED to COMPLETED error';
+                                $this->log->debug('payment_paypal ' . $notify_type . ' APPROVED to COMPLETED error');
+                                throw new ApiException(['code'=>98,'msg'=>'fail','data'=>['payment'=>$payment]]);
                             }
-                            if($notify_type=='return'){
-                                $payment->return_redirect($payment->success_url);
-                            }else{
-                                throw new ApiException(['code' => 0, 'msg' => 'success']);
-                            }
-                        }else{
-                            $msg = 'payment_paypal '.$notify_type.' APPROVED to COMPLETED error';
-                            $this->log->debug('payment_paypal '.$notify_type.' APPROVED to COMPLETED error');
-                            if($notify_type=='return'){
-                                $payment->return_redirect($payment->fail_url);
-                            }else{
-                                throw new ApiException(['code' => 1, 'msg' => $msg]);
-                            }
+                        } else if ($payment->status > 0) {
+                            $this->log->debug('payment_paypal return status > 0');
+                            throw new ApiException(['code'=>99,'msg'=>'success','data'=>['payment'=>$payment]]);
+                        } else {
+                            throw new ApiException(['code'=>98,'msg'=>'fail','data'=>['payment'=>$payment]]);
                         }
-                    }else if($payment->status>0){
-                        $this->log->debug('payment_paypal return status > 0');
-                        $payment->return_redirect($payment->success_url);
-                    }else{
-                        $payment->return_redirect($payment->fail_url);
+                    } else {
+                        throw new ApiException(['code' => 1, 'msg' => 'fail']);
                     }
-                }else{
-                    throw new ApiException(['code'=>1,'msg'=>'fail']);
+                }catch (ApiException $e){
+                    if($e->code==99) {
+                        DB::commit();
+                        $e->data['payment']->return_redirect($e->data['payment']->success_url);
+                    }else if($e->code==98){
+                        DB::rollBack();
+                        $e->data['payment']->return_redirect($e->data['payment']->fail_url);
+                    }else{
+                        DB::rollBack();
+                        throw $e;
+                    }
                 }
             }else{
                 $this->log->debug('payment_paypal return token error '.$transaction_id.'  '.$request->query('token'));
@@ -203,28 +210,35 @@ class Paypal
             $this->log->debug('payment_paypal notify start',$input);
             $transaction_id = $input['resource']['supplementary_data']['related_ids']['order_id'];
             $invoice_id = $input['resource']['invoice_id'];
-            $payment = Payment::where(['transaction_id'=>$transaction_id,'id'=>$invoice_id])->first();
-            if(!empty($payment)){
-                if($payment->status>0){
-                    $this->log->debug('payment_paypal notify status > 0');
-                    throw new ApiException('');
-                }
-                $orderShow = $this->order->show($transaction_id);
-                if($orderShow['status']=='COMPLETED') {
-                    $payment->status = 1;
-                    $payment->notify_type = 'notify';
-                    $payment->cred_id=$orderShow['purchase_units'][0]['payments']['captures']['0']['id'];
-                    if ($payment->save() && $payment->notify_func) {
-                        $this->log->debug('payment_paypal notify COMPLETED ok');
-                        $this->callBack($payment->notify_func, $payment);
+            DB::beginTransaction();
+            try{
+                $payment = Payment::where(['id'=>$invoice_id])->lockForUpdate()->first();
+                if(!empty($payment) && $payment->transaction_id==$transaction_id){
+                    if($payment->status>0){
+                        $this->log->debug('payment_paypal notify status > 0');
+                        throw new ApiException('');
                     }
-                    throw new ApiException('');
+                    $orderShow = $this->order->show($transaction_id);
+                    if($orderShow['status']=='COMPLETED') {
+                        $payment->status = 1;
+                        $payment->notify_type = 'notify';
+                        $payment->cred_id=$orderShow['purchase_units'][0]['payments']['captures']['0']['id'];
+                        if ($payment->save() && $payment->notify_func) {
+                            $this->log->debug('payment_paypal notify COMPLETED ok');
+                            $this->callBack($payment->notify_func, $payment);
+                        }
+                    }else{
+                        throw new ApiException(['code'=>3,'msg'=>'fail']);
+                    }
                 }else{
-                    throw new ApiException(['code'=>3,'msg'=>'fail']);
+                    throw new ApiException(['code'=>2,'msg'=>'fail']);
                 }
-            }else{
-                throw new ApiException(['code'=>2,'msg'=>'fail']);
+            }catch (ApiException $e){
+                DB::rollBack();
+                throw $e;
             }
+            DB::commit();
+            throw new ApiException('');
         }else{
             throw new ApiException(['code'=>-1,'msg'=>'fail']);
         }

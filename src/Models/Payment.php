@@ -7,6 +7,7 @@ use Aphly\Laravel\Libs\Snowflake;
 use Aphly\LaravelCommon\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class Payment extends Model
@@ -142,13 +143,20 @@ class Payment extends Model
     public function sync_api($payment_id)
     {
         if($payment_id){
-            $payment = Payment::where('id',$payment_id)->where('status',0)->firstOrError();
-            $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
-            if (class_exists($class)){
-                (new $class)->sync($payment);
-            }else{
-                throw new ApiException(['code'=>3,'msg'=>'class error']);
+            DB::beginTransaction();
+            try{
+                $payment = Payment::where('id',$payment_id)->where('status',0)->lockForUpdate()->first();
+                $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($payment->method_name);
+                if (class_exists($class)){
+                    (new $class)->sync($payment);
+                }else{
+                    throw new ApiException(['code'=>3,'msg'=>'class error']);
+                }
+            }catch (ApiException $e){
+                DB::rollBack();
+                throw $e;
             }
+            DB::commit();
         }else{
             throw new ApiException(['code'=>1,'msg'=>'cancel refund amount error']);
         }

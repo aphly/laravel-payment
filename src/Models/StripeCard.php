@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
 use Stripe\Webhook;
@@ -28,6 +29,39 @@ class StripeCard
         }
     }
 
+    public function sync($payment)
+    {
+        $this->log->debug('payment_stripeCard sync start');
+        if(!empty($payment)){
+            if($payment->status==0){
+                $stripe = new StripeClient($this->sk);
+                $sessions = $stripe->paymentIntents->retrieve($payment->transaction_id,[]);
+                $this->log->debug('payment_stripeCard sync show');
+                $this->log->debug($sessions);
+                if(isset($sessions) && $sessions->status=='succeeded'){
+                    $payment->status=1;
+                    $payment->notify_type='sync';
+                    $payment->cred_id=$sessions->id;
+                    if($payment->save() && $payment->notify_func){
+                        $this->log->debug('payment_stripeCard sync ok');
+                        $this->callBack($payment->notify_func,$payment);
+                    }
+                    throw new ApiException(['code'=>0,'msg'=>'success']);
+                }else{
+                    $this->log->debug('payment_stripeCard sync complete error');
+                    throw new ApiException(['code'=>1,'msg'=>'payment_stripeCard sync complete error']);
+                }
+            }else if($payment->status>0){
+                $this->log->debug('payment_stripeCard sync status > 0');
+                throw new ApiException(['code'=>2,'msg'=>'payment_stripeCard sync status > 0']);
+            }else{
+                throw new ApiException(['code'=>3,'msg'=>'payment_stripeCard sync fail']);
+            }
+        }else{
+            throw new ApiException(['code'=>4,'msg'=>'fail']);
+        }
+    }
+
     public function callBack($classfunc,$payment)
     {
         if($classfunc && $payment){
@@ -39,52 +73,67 @@ class StripeCard
         }
     }
 
-    function return($method_id){
-        $card_payment_id = session('card_payment_id',0);
+    function return(){
         $payment_intent = session('card_payment_intent','');
-        if(!$card_payment_id || !$payment_intent){
-            $this->log->debug('payment_stripeCard return fail '.$card_payment_id.'  '.$payment_intent);
+        $card_payment_id = session('card_payment_id');
+        if(!$payment_intent || !$card_payment_id){
+            $this->log->debug('payment_stripeCard return fail '.$payment_intent.' '.$card_payment_id);
             throw new ApiException(['code'=>1,'msg'=>'fail']);
         }
-        $payment = Payment::where(['id'=>$card_payment_id,'method_id'=>$method_id,'transaction_id'=>$payment_intent])->first();
-        if(!empty($payment)){
-            if($payment->status==0){
-                $stripe = new StripeClient($this->sk);
-                $sessions = $stripe->paymentIntents->retrieve($payment_intent,[]);
-                $this->log->debug('payment_stripeCard return show');
-                $this->log->debug($sessions);
-                if(!empty($sessions)){
-                    if($sessions->status=='succeeded'){
-                        $payment->status=1;
-                        $payment->notify_type='return';
-                        $payment->cred_id=$sessions->id;
-                        if($payment->save() && $payment->notify_func){
-                            $this->log->debug('payment_stripeCard return ok');
+        $this->log->debug('payment_stripeCard return beginTransaction');
+        DB::beginTransaction();
+        try {
+            $payment = Payment::where(['id'=>$card_payment_id])->lockForUpdate()->first();
+            if(!empty($payment) && $payment_intent==$payment->transaction_id){
+                if($payment->status==0){
+                    $stripe = new StripeClient($this->sk);
+                    $sessions = $stripe->paymentIntents->retrieve($payment_intent,[]);
+                    $this->log->debug('payment_stripeCard return show');
+                    $this->log->debug($sessions);
+                    if(!empty($sessions)){
+                        if($sessions->status=='succeeded'){
+                            $payment->status=1;
+                            $payment->notify_type='return';
+                            $payment->cred_id=$sessions->id;
+                            if($payment->save() && $payment->notify_func){
+                                $this->log->debug('payment_stripeCard return ok');
+                                $this->clear();
+                                $this->callBack($payment->notify_func,$payment);
+                            }
+                            throw new ApiException(['code'=>99,'msg'=>'success','data'=>['payment'=>$payment]]);
+                        }else if($sessions->status=='processing'){
+                            $this->log->debug('payment_stripeCard return processing');
                             $this->clear();
-                            $this->callBack($payment->notify_func,$payment);
+                            throw new ApiException(['code'=>99,'msg'=>'success','data'=>['payment'=>$payment]]);
+                        }else{
+                            $this->log->debug('payment_stripeCard return complete error');
+                            throw new ApiException(['code'=>98,'msg'=>'fail','data'=>['payment'=>$payment]]);
                         }
-                        $payment->return_redirect($payment->success_url);
-                    }else if($sessions->status=='processing'){
-                        $this->log->debug('payment_stripeCard return processing');
-                        $this->clear();
-                        $payment->return_redirect($payment->success_url);
                     }else{
                         $this->log->debug('payment_stripeCard return complete error');
-                        $payment->return_redirect($payment->fail_url);
+                        throw new ApiException(['code'=>98,'msg'=>'fail','data'=>['payment'=>$payment]]);
                     }
+                }else if($payment->status>0){
+                    $this->log->debug('payment_stripeCard return status > 0');
+                    throw new ApiException(['code'=>99,'msg'=>'success','data'=>['payment'=>$payment]]);
                 }else{
-                    $this->log->debug('payment_stripeCard return complete error');
-                    $payment->return_redirect($payment->fail_url);
+                    throw new ApiException(['code'=>98,'msg'=>'fail','data'=>['payment'=>$payment]]);
                 }
-            }else if($payment->status>0){
-                $this->log->debug('payment_stripeCard return status > 0');
-                $payment->return_redirect($payment->success_url);
             }else{
-                $payment->return_redirect($payment->fail_url);
+                $this->log->debug('payment_stripeCard return fail ');
+                throw new ApiException(['code'=>1,'msg'=>'fail']);
             }
-        }else{
-            $this->log->debug('payment_stripeCard return fail ');
-            throw new ApiException(['code'=>1,'msg'=>'fail']);
+        }catch (ApiException $e) {
+            if($e->code==99) {
+                DB::commit();
+                $e->data['payment']->return_redirect($e->data['payment']->success_url);
+            }else if($e->code==98){
+                DB::rollBack();
+                $e->data['payment']->return_redirect($e->data['payment']->fail_url);
+            }else{
+                DB::rollBack();
+                throw $e;
+            }
         }
     }
 
@@ -117,22 +166,33 @@ class StripeCard
                 if($session->status == 'succeeded') {
                     $transaction_id = $session->id;
                     $payment = Payment::where(['transaction_id'=>$transaction_id,'method_id'=>3])->first();
-                    if(!empty($payment)){
-                        if($payment->status>0){
-                            $this->log->debug('payment_stripeCard notify completed status>0');
-                        }else if($payment->status==0){
-                            $this->log->debug('payment_stripeCard notify completed status==1');
-                            $payment->status=1;
-                            $payment->notify_type='notify';
-                            $payment->cred_id=$session->id;
-                            if($payment->save() && $payment->notify_func){
-                                $this->log->debug('payment_stripeCard notify ok');
-                                $this->callBack($payment->notify_func,$payment);
+                    $this->log->debug('payment_stripeCard notify beginTransaction');
+                    DB::beginTransaction();
+                    try{
+                        $payment = Payment::where(['id'=>$payment->id])->lockForUpdate()->first();
+                        if(!empty($payment) && $payment->transaction_id==$transaction_id){
+                            if($payment->status>0){
+                                $this->log->debug('payment_stripeCard notify completed status>0');
+                            }else if($payment->status==0){
+                                $this->log->debug('payment_stripeCard notify completed status==1');
+                                $payment->status=1;
+                                $payment->notify_type='notify';
+                                $payment->cred_id=$session->id;
+                                if($payment->save() && $payment->notify_func){
+                                    $this->log->debug('payment_stripeCard notify ok');
+                                    $this->callBack($payment->notify_func,$payment);
+                                }
+                            }else{
+                                $this->log->debug('payment_stripeCard notify completed status');
                             }
-                        }else{
-                            $this->log->debug('payment_stripeCard notify completed status');
                         }
+                    }catch (ApiException $e){
+                        DB::rollBack();
+                        throw $e;
                     }
+                    DB::commit();
+                }else{
+                    $this->log->debug('payment_stripeCard notify status:'.$session->status);
                 }
                 break;
             default:
