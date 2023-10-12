@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\Laravel\Libs\Math;
 use Aphly\Laravel\Libs\Snowflake;
 use Aphly\LaravelCommon\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -92,9 +93,10 @@ class Payment extends Model
         $paymentRefund = PaymentRefund::where('payment_id',$payment->id)->where('status',1)->get();
         $refund_total = 0;
         foreach ($paymentRefund as $val){
-            $refund_total += $val['amount'];
+            $refund_total = Math::add($refund_total,$val['amount']);
+
         }
-        $refund_total_pd = $data['amount']+$refund_total;
+        $refund_total_pd = Math::add($data['amount'],$refund_total);
         if($refund_total_pd<=$payment->amount){
             $data['status'] = 0;
             list(,$data['amount_format']) = Currency::codeFormat($data['amount'],$payment->currency_code);

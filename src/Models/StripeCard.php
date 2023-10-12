@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\Laravel\Libs\Math;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
@@ -234,7 +235,7 @@ class StripeCard
             if($amount && $currency){
                 $stripe = new StripeClient($this->sk);
                 $paymentIntent = $stripe->paymentIntents->create([
-                    'amount' => intval($amount*100),
+                    'amount' => Math::mul($amount, 100,0),
                     'currency' => $currency,
                     'automatic_payment_methods' => [
                         'enabled' => true,

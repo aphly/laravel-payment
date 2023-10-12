@@ -3,6 +3,7 @@
 namespace Aphly\LaravelPayment\Models;
 
 use Aphly\Laravel\Exceptions\ApiException;
+use Aphly\Laravel\Libs\Math;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
@@ -46,7 +47,7 @@ class Stripe
                         'quantity' => 1,
                         'price_data' => [
                             'currency' => 'usd',
-                            'unit_amount' => intval($payment->amount*100),
+                            'unit_amount' => Math::mul($payment->amount, 100,0),
                             'product_data' => [
                                 'name' => 'Payment_name',
                                 'description' => 'Payment_description',
@@ -248,7 +249,7 @@ class Stripe
 
     public function refund($payment,$refund){
         $stripe = new StripeClient($this->sk);
-        $amount = intval($refund->amount*100);
+        $amount = Math::mul($refund->amount, 100,0);
         $refund_res = $stripe->refunds->create(['payment_intent' => $payment->cred_id, 'amount' => $amount]);
         $this->log->debug('payment_stripe refund res');
         if(isset($refund_res->id)){

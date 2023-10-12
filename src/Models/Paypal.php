@@ -166,7 +166,7 @@ class Paypal
                                 throw new ApiException(['code'=>99,'msg'=>'success','data'=>['payment'=>$payment]]);
                             } else {
                                 $msg = 'payment_paypal ' . $notify_type . ' APPROVED to COMPLETED error';
-                                $this->log->debug('payment_paypal ' . $notify_type . ' APPROVED to COMPLETED error');
+                                $this->log->debug($msg);
                                 throw new ApiException(['code'=>98,'msg'=>'fail','data'=>['payment'=>$payment]]);
                             }
                         } else if ($payment->status > 0) {
