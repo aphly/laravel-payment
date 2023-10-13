@@ -147,7 +147,7 @@ class Paypal
         if($payment_token){
             list($payment_id,$transaction_id) = explode(',',$payment_token);
             if($transaction_id == $request->query('token')){
-                $this->log->debug('payment_paypal return start',$request->all());
+                $this->log->debug('payment_paypal return beginTransaction start',$request->all());
                 DB::beginTransaction();
                 try {
                     $payment = Payment::where(['id' => $payment_id])->lockForUpdate()->first();
@@ -207,7 +207,7 @@ class Paypal
             if(!$input){
                 throw new ApiException(['code'=>-2,'msg'=>'fail']);
             }
-            $this->log->debug('payment_paypal notify start',$input);
+            $this->log->debug('payment_paypal notify beginTransaction start',$input);
             $transaction_id = $input['resource']['supplementary_data']['related_ids']['order_id'];
             $invoice_id = $input['resource']['invoice_id'];
             DB::beginTransaction();

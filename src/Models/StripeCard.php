@@ -81,7 +81,7 @@ class StripeCard
             $this->log->debug('payment_stripeCard return fail '.$payment_intent.' '.$card_payment_id);
             throw new ApiException(['code'=>1,'msg'=>'fail']);
         }
-        $this->log->debug('payment_stripeCard return beginTransaction');
+        $this->log->debug('payment_stripeCard return beginTransaction start');
         DB::beginTransaction();
         try {
             $payment = Payment::where(['id'=>$card_payment_id])->lockForUpdate()->first();
@@ -142,7 +142,7 @@ class StripeCard
         \Stripe\Stripe::setApiKey($this->sk);
         $this->log->debug('payment_stripeCard notify start');
         $payload = @file_get_contents('php://input');
-        $this->log->debug($payload);
+        //$this->log->debug($payload);
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
         $this->log->debug($sig_header);
         $endpoint_secret = $this->es;
@@ -166,11 +166,10 @@ class StripeCard
                 $this->log->debug('payment_stripeCard notify succeeded ');
                 if($session->status == 'succeeded') {
                     $transaction_id = $session->id;
-                    $payment = Payment::where(['transaction_id'=>$transaction_id,'method_id'=>3])->first();
-                    $this->log->debug('payment_stripeCard notify beginTransaction');
+                    $this->log->debug('payment_stripeCard notify beginTransaction start');
                     DB::beginTransaction();
                     try{
-                        $payment = Payment::where(['id'=>$payment->id])->lockForUpdate()->first();
+                        $payment = Payment::where(['transaction_id'=>$transaction_id,'method_id'=>3])->lockForUpdate()->first();
                         if(!empty($payment) && $payment->transaction_id==$transaction_id){
                             if($payment->status>0){
                                 $this->log->debug('payment_stripeCard notify completed status>0');

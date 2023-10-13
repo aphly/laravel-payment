@@ -127,7 +127,7 @@ class Stripe
         $payment_token = session('payment_token');
         if($payment_token){
             list($payment_id,$transaction_id) = explode(',',$payment_token);
-            $this->log->debug('payment_stripe return start',request()->all());
+            $this->log->debug('payment_stripe return beginTransaction start',request()->all());
             DB::beginTransaction();
             try{
                 $payment = Payment::where(['id'=>$payment_id])->lockForUpdate()->first();
@@ -181,7 +181,7 @@ class Stripe
         \Stripe\Stripe::setApiKey($this->sk);
         $this->log->debug('payment_stripe notify start');
         $payload = @file_get_contents('php://input');
-        $this->log->debug($payload);
+        //$this->log->debug($payload);
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
         $this->log->debug($sig_header);
         $endpoint_secret = $this->es;
@@ -202,7 +202,7 @@ class Stripe
         $session = $event->data->object;
         switch ($event->type) {
             case 'checkout.session.completed':
-                $this->log->debug('payment_stripe notify completed ');
+                $this->log->debug('payment_stripe notify beginTransaction start ');
                 if($session->payment_status == 'paid') {
                     $payment_id = $session->client_reference_id;
                     DB::beginTransaction();
@@ -237,6 +237,8 @@ class Stripe
             case 'checkout.session.async_payment_failed':
                 $this->log->debug('payment_stripe notify async_payment_failed ');
                 break;
+            default:
+                $this->log->debug('Received unknown event type ' . $event->type);
         }
         throw new ApiException('');
     }
