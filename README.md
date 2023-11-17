@@ -2,8 +2,8 @@
 支持 paypal stripe<br>
 
 环境<br>
-php8.0+<br>
-laravel9.0+<br>
+php8.1+<br>
+laravel10.0+<br>
 mysql5.7+<br>
 
 安装<br>
