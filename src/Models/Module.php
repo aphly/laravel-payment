@@ -12,8 +12,7 @@ class Module extends Module_base
 {
     public $dir = __DIR__;
 
-    public function install($module_id){
-        parent::install($module_id);
+    public function remoteInstall($module_id){
         $manager = Manager::where('username','admin')->firstOrError();
         $menu = Menu::create(['name' => '支付中心','route' =>'','pid'=>0,'uuid'=>$manager->uuid,'type'=>1,'module_id'=>$module_id,'sort'=>10]);
         if($menu->id){
@@ -74,8 +73,7 @@ class Module extends Module_base
         return 'install_ok';
     }
 
-    public function uninstall($module_id){
-        parent::uninstall($module_id);
+    public function remoteUninstall($module_id){
         return 'uninstall_ok';
     }
 
