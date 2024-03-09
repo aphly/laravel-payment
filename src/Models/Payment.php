@@ -45,7 +45,7 @@ class Payment extends Model
     public function make($data)
     {
         $paymentMethod = PaymentMethod::where('id',$data['method_id'])->where('status',1)->firstOrError();
-        $data['amount'] = number_format(floatval($data['amount']),2);
+        $data['amount'] = number_format(floatval($data['amount']),2,'.','');
         if($data['amount']>0){
             $data['id'] = $this->orderId();
             $data['method_name'] = $paymentMethod->name;
