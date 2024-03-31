@@ -34,7 +34,7 @@ class PaymentController extends Controller
                     }
                 })
             ->orderBy('created_at','desc')
-            ->Paginate(config('admin.perPage'))->withQueryString();
+            ->Paginate(config('base.perPage'))->withQueryString();
         $res['method'] = PaymentMethod::get()->keyBy('id');
         $res['breadcrumb'] = Breadcrumb::render([
             ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],
