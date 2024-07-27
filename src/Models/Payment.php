@@ -5,7 +5,6 @@ namespace Aphly\LaravelPayment\Models;
 use Aphly\Laravel\Exceptions\ApiException;
 use Aphly\Laravel\Libs\Math;
 use Aphly\Laravel\Libs\Snowflake;
-use Aphly\LaravelCommon\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Aphly\Laravel\Models\Model;
 use Illuminate\Support\Facades\DB;

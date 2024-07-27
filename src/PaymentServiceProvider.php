@@ -15,9 +15,7 @@ class PaymentServiceProvider extends ServiceProvider
 
     public function register()
     {
-		$this->mergeConfigFrom(
-            __DIR__.'/config/payment.php', 'payment'
-        );
+
     }
 
     /**
@@ -30,8 +28,8 @@ class PaymentServiceProvider extends ServiceProvider
         $comm_module= (new Comm)->moduleClass();
         if(in_array('Aphly\LaravelPayment',$comm_module)) {
             $this->publishes([
-                __DIR__ . '/config/payment.php' => config_path('payment.php'),
-                __DIR__ . '/public' => public_path('static/payment')
+               // __DIR__ . '/config/payment.php' => config_path('payment.php'),
+                __DIR__ . '/public' => public_path('static/payment'),
             ]);
             //$this->loadMigrationsFrom(__DIR__.'/migrations');
             $this->loadViewsFrom(__DIR__ . '/views', 'laravel-payment');

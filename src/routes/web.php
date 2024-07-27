@@ -32,8 +32,10 @@ Route::middleware(['web'])->group(function () {
         Route::middleware(['rbac'])->group(function () {
 
             $route_arr = [
-                ['method','\MethodController'],['payment','\PaymentController'],['params','\ParamsController']
+                ['method','\MethodController'],['payment','\PaymentController'],['params','\ParamsController'],
+                ['currency','\CurrencyController'],
             ];
+
             foreach ($route_arr as $val){
                 Route::get($val[0].'/index', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@index');
                 Route::get($val[0].'/form', 'Aphly\LaravelPayment\Controllers\Admin'.$val[1].'@form');

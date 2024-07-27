@@ -13,7 +13,7 @@ class PaymentController extends Controller
 {
     public $index_url='/payment_admin/payment/index';
 
-    private $currArr = ['name'=>'支付','key'=>'method'];
+    public $currArr = ['name'=>'支付','key'=>'method','admin'=>'payment_admin'];
 
     public function index(Request $request)
     {

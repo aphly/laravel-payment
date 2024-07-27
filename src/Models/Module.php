@@ -7,16 +7,20 @@ use Aphly\Laravel\Models\Manager;
 use Aphly\Laravel\Models\Menu;
 use Aphly\Laravel\Models\Module as Module_base;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Module extends Module_base
 {
     public $dir = __DIR__;
 
     public function remoteInstall($module_id){
+
+
         $manager = Manager::where('username','admin')->firstOrError();
         $menu = Menu::create(['name' => '支付中心','route' =>'','pid'=>0,'uuid'=>$manager->uuid,'type'=>1,'module_id'=>$module_id,'sort'=>10]);
         if($menu->id){
             $data=[];
+            $data[] =['name' => '货币','route' =>'payment_admin/currency/index','pid'=>$menu->id,'uuid'=>$manager->uuid,'type'=>2,'module_id'=>$module_id,'sort'=>0];
             $data[] =['name' => '支付方式','route' =>'payment_admin/method/index','pid'=>$menu->id,'uuid'=>$manager->uuid,'type'=>2,'module_id'=>$module_id,'sort'=>0];
             $data[] =['name' => '流水号','route' =>'payment_admin/payment/index','pid'=>$menu->id,'uuid'=>$manager->uuid,'type'=>2,'module_id'=>$module_id,'sort'=>0];
             DB::table('admin_menu')->insert($data);
@@ -27,6 +31,12 @@ class Module extends Module_base
             $data[] =['role_id' => 1,'menu_id'=>$val->id];
         }
         DB::table('admin_role_menu')->insert($data);
+
+        $data=[];
+        $data[] =['name' =>"Pound Sterling",'timezone'=>"Europe/London",'code'=>"GBP",'symbol_left'=>"£", 'symbol_right'=>"", 'decimal_place'=>"2", 'value'=>0.8044, 'status'=>1,'default'=>0];
+        $data[] =['name' =>"US Dollar",'timezone'=>"America/New_York",'code'=>"USD",'symbol_left'=>"$", 'symbol_right'=>"", 'decimal_place'=>"2", 'value'=>1, 'status'=>1,'default'=>1];
+        $data[] =['name' =>"Euro",'timezone'=>"Europe/Berlin",'code'=>"EUR",'symbol_left'=>"€", 'symbol_right'=>"", 'decimal_place'=>"2", 'value'=>0.9362, 'status'=>1,'default'=>0];
+        DB::table('payment_currency')->insert($data);
 
         $method = PaymentMethod::create(['name' => 'paypal','status'=>1,'default'=>1]);
         if($method->id){

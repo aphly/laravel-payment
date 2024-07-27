@@ -11,7 +11,7 @@ class RefundController extends Controller
 {
     public $index_url='/payment_admin/refund/index';
 
-    private $currArr = ['name'=>'退款','key'=>'method'];
+    public $currArr = ['name'=>'退款','key'=>'method','admin'=>'payment_admin'];
 
     public function index(Request $request)
     {

@@ -11,7 +11,7 @@ class MethodController extends Controller
 {
     public $index_url='/payment_admin/method/index';
 
-    private $currArr = ['name'=>'方式','key'=>'method'];
+    public $currArr = ['name'=>'方式','key'=>'method','admin'=>'payment_admin'];
 
     public function index(Request $request)
     {
