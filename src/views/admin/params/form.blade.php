@@ -7,13 +7,13 @@
         @csrf
         <div class="">
             <div class="form-group">
-                <label for="">key</label>
+                <label >key</label>
                 <input type="text" name="key" class="form-control " value="{{$res['info']->key}}">
                 <div class="invalid-feedback"></div>
             </div>
 
             <div class="form-group">
-                <label for="">val</label>
+                <label >val</label>
                 <input type="text" name="val" class="form-control " value="{{$res['info']->val}}">
                 <div class="invalid-feedback"></div>
             </div>

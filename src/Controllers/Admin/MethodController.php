@@ -11,7 +11,7 @@ class MethodController extends Controller
 {
     public $index_url='/payment_admin/method/index';
 
-    private $currArr = ['name'=>'方式','key'=>'method'];
+    public $currArr = ['name'=>'方式','key'=>'method','admin'=>'payment_admin'];
 
     public function index(Request $request)
     {
@@ -24,7 +24,7 @@ class MethodController extends Controller
                     }
                 })
             ->orderBy('id','desc')
-            ->Paginate(config('admin.perPage'))->withQueryString();
+            ->Paginate(config('base.perPage'))->withQueryString();
         $res['breadcrumb'] = Breadcrumb::render([
             ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url]
         ]);

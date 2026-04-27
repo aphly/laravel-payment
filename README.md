@@ -24,3 +24,6 @@ channels 中添加
 'level' => env('LOG_LEVEL', 'debug'),
 'days' => 30,
 ],`
+
+初始化<br>
+`php artisan laravel-payment:init` <br>

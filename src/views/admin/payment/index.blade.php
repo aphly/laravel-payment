@@ -10,7 +10,7 @@
         <div class="search_box ">
             <input type="search" name="id" placeholder="id" autocomplete="false" value="{{$res['search']['id']}}">
             <select name="method_id" >
-                <option value="0">All</option>
+                <option value="">All</option>
                 @foreach($res['method'] as $val)
                 <option value="{{$val->id}}">{{$val->name}}</option>
                 @endforeach

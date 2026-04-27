@@ -2,10 +2,11 @@
 
 namespace Aphly\LaravelPayment\Services\Paypal;
 
+use Aphly\Laravel\Exceptions\ApiException;
 use Aphly\LaravelPayment\Models\PaymentMethod;
-use Aphly\LaravelPayment\Models\PaymentMethodParams;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Client
 {
@@ -32,17 +33,26 @@ class Client
     }
 
     public function generateBaseUrl($v=true): string {
-        return ($this->environment === 'LIVE' ? self::LIVE_URL : self::SANDBOX_URL) . ($v?self::VERSION:'');
+        return ($this->environment == 'LIVE' ? self::LIVE_URL : self::SANDBOX_URL) . ($v?self::VERSION:'');
     }
 
     public function token(){
         if($this->client_id && $this->secret){
             return Cache::remember('paypal_token',7200, function () {
-                $res = Http::connectTimeout(20)->withBasicAuth($this->client_id,$this->secret)->asForm()->baseUrl($this->generateBaseUrl(false))->post('v1/oauth2/token',[
+                $res = Http::connectTimeout(20)->withBasicAuth($this->client_id,$this->secret)
+                    ->asForm()->baseUrl($this->generateBaseUrl(false))->post('v1/oauth2/token',[
                     'grant_type'=>'client_credentials'
                 ])->json();
+                Log::channel('payment')->debug('paypal client_id:'.$this->client_id);
+                Log::channel('payment')->debug('paypal secret:'.$this->secret);
+                Log::channel('payment')->debug('paypal token_res:',$res);
+                if(empty($res['access_token'])){
+                    throw new ApiException(['code'=>1,'msg'=>'paypal token_res fail']);
+                }
                 return $res['access_token'];
             });
+        }else{
+            throw new ApiException(['code'=>2,'msg'=>'Paypal client_id and secret error']);
         }
     }
 

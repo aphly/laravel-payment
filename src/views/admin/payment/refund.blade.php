@@ -67,12 +67,12 @@
         <div class="info_title">refund form</div>
         <div class="info_title_x">
             <div class="form-group">
-                <label for="">amount</label>
+                <label >amount</label>
                 <input type="text" name="amount" class="form-control " value="0">
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
-                <label for="">reason</label>
+                <label >reason</label>
                 <input type="text" name="reason" class="form-control " value="">
                 <div class="invalid-feedback"></div>
             </div>

@@ -7,17 +7,17 @@
         @csrf
         <div class="">
             <div class="form-group">
-                <label for="">名称</label>
+                <label >名称</label>
                 <input type="text" name="name" class="form-control " value="{{$res['info']->name}}">
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
-                <label for="">排序</label>
+                <label >排序</label>
                 <input type="number" name="sort" class="form-control " value="{{$res['info']->sort??0}}">
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
-                <label for="">默认</label>
+                <label >默认</label>
                 <select name="default" class="form-control">
                     @if(isset($dict['yes_no']))
                         @foreach($dict['yes_no'] as $key=>$val)
@@ -28,7 +28,7 @@
                 <div class="invalid-feedback"></div>
             </div>
             <div class="form-group">
-                <label for="">状态</label>
+                <label >状态</label>
                 <select name="status"  class="form-control">
                     @if(isset($dict['status']))
                         @foreach($dict['status'] as $key=>$val)

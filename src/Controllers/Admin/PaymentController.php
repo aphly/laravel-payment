@@ -13,7 +13,7 @@ class PaymentController extends Controller
 {
     public $index_url='/payment_admin/payment/index';
 
-    private $currArr = ['name'=>'支付','key'=>'method'];
+    public $currArr = ['name'=>'支付','key'=>'method','admin'=>'payment_admin'];
 
     public function index(Request $request)
     {
@@ -34,7 +34,7 @@ class PaymentController extends Controller
                     }
                 })
             ->orderBy('created_at','desc')
-            ->Paginate(config('admin.perPage'))->withQueryString();
+            ->Paginate(config('base.perPage'))->withQueryString();
         $res['method'] = PaymentMethod::get()->keyBy('id');
         $res['breadcrumb'] = Breadcrumb::render([
             ['name'=>$this->currArr['name'].'管理','href'=>$this->index_url],

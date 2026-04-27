@@ -18,7 +18,7 @@ class ParamsController extends Controller
         $res['search']['title'] = $request->query('title', '');
         $res['search']['string'] = http_build_query($request->query());
         $res['list'] = PaymentMethodParams::where('method_id',$res['method']->id)
-            ->Paginate(config('admin.perPage'))->withQueryString();
+            ->Paginate(config('base.perPage'))->withQueryString();
         $res['breadcrumb'] = Breadcrumb::render([
             ['name'=>'方式管理','href'=>'/payment_admin/method/index'],
             ['name'=>$res['method']->name,'href'=>$this->index_url.'?method_id='.$res['method']->id]
