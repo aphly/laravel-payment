@@ -67,6 +67,7 @@ class Init extends Command
             $data[] =['method_id' => $method->id,'key'=>'environment','val'=>''];
             $data[] =['method_id' => $method->id,'key'=>'client_id','val'=>'AXeCqoXm87DP2phnjdGPvezz9MXESXg9NKq-gOC5zfzS1umTF4KH5p5eJzahBwRCmpPtSs-Qi5hyuwuN'];
             $data[] =['method_id' => $method->id,'key'=>'secret','val'=>'ELRFtOiwsRfGAG_Zs7-6ezrsirRvl702YWmf-Zg424J4mEfwsM2wmW0SVJwCOET5LDSFxG5W3XlaekYS'];
+            $data[] =['method_id' => $method->id,'key'=>'webhookId','val'=>'9DB44140G51518449'];
             DB::table('payment_method_params')->insert($data);
         }
 
@@ -93,6 +94,7 @@ class Init extends Command
             $data=[];
             $data[] =['dict_id' => $dict->id,'name'=>'未支付','value'=>'0'];
             $data[] =['dict_id' => $dict->id,'name'=>'已支付','value'=>'1'];
+            $data[] =['dict_id' => $dict->id,'name'=>'已批准','value'=>'2'];
             DB::table('common_dict_value')->insert($data);
         }
 

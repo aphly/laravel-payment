@@ -18,8 +18,12 @@ class Client
     public $environment = '';
     public $client_id = '';
     public $secret = '';
+    public $webhookId = '';
 
     public $output = '';
+    public $code = 0;
+
+    public $log;
 
     function __construct()
     {
@@ -30,6 +34,7 @@ class Client
                 $this->$key = $val->val;
             }
         }
+        $this->log = Log::channel('payment');
     }
 
     public function generateBaseUrl($v=true): string {
@@ -57,8 +62,12 @@ class Client
     }
 
     public function http($url,$method='get',$data='',$headers=[]){
+        return $this->http_full($this->generateBaseUrl().$url,$method,$data,$headers);
+    }
+
+    public function http_full($url,$method='get',$data='',$headers=[]){
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->generateBaseUrl().$url);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         if(!$headers){
             $headers[]="Content-Type:application/json";
@@ -72,6 +81,7 @@ class Client
             curl_setopt($ch, CURLOPT_POSTFIELDS , json_encode($data));
         }
         $this->output = curl_exec($ch);
+        $this->code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         return $this;
     }
@@ -83,4 +93,43 @@ class Client
     public function body(){
         return $this->output;
     }
+
+    function getallheaders() {
+        $headers = [];
+        foreach ($_SERVER as $k => $v) {
+            if (strpos($k, 'HTTP_') === 0) {
+                $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($k, 5)))));
+                $headers[$key] = $v;
+            }
+        }
+        return $headers;
+    }
+
+    public function verifySignature(){
+        $rawBody = file_get_contents('php://input');
+        $headers = $this->getallheaders();
+        $this->log->debug('payment_paypal verifySignature start webhookId:'.$this->webhookId);
+        $this->log->debug($rawBody);
+        $this->log->debug(json_encode($headers));
+        $verifyBody = [
+            'auth_algo'         => $headers['Paypal-Auth-Algo']??'',
+            'cert_url'           => $headers['Paypal-Cert-Url']??'',
+            'transmission_id'    => $headers['Paypal-Transmission-Id']??'',
+            'transmission_sig'   => $headers['Paypal-Transmission-Sig']??'',
+            'transmission_time'  => $headers['Paypal-Transmission-Time']??'',
+            'webhook_id'         => $this->webhookId,
+            'webhook_event'      => json_decode($rawBody, true)
+        ];
+        $this->log->debug(json_encode($verifyBody));
+        $this->http_full($this->generateBaseUrl(false).'/v1/notifications/verify-webhook-signature',
+            'post',$verifyBody);
+        $this->log->debug($this->output);
+        $json = $this->json();
+        if($this->code === 200 && $json['verification_status'] === 'SUCCESS'){
+            return $rawBody;
+        }else{
+            return false;
+        }
+    }
+
 }

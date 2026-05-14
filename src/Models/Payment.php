@@ -51,7 +51,7 @@ class Payment extends Model
         }
     }
 
-    public function pay($redirect = true,$id=false)
+    public function pay($type = 1,$id=false)
     {
         $this->log->debug('payment_pay start');
         if($id){
@@ -62,7 +62,7 @@ class Payment extends Model
         $class = '\Aphly\LaravelPayment\Models\\'.ucfirst($info->method_name);
         if (class_exists($class)){
             $this->log->debug('payment_pay '.$info->method_name.' Payment id '.$info->id);
-            (new $class)->pay($info,$redirect);
+            (new $class)->pay($info,$type);
         }else{
             throw new ApiException(['code' => 1, 'msg' => 'Class Fail '.$info->method_name]);
         }
