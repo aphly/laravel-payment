@@ -44,13 +44,16 @@ class Paypal
                 if($payment->save()){
                     $this->log->debug('payment_paypal pay create paypal_id: '.$res_arr['id']);
                     if($type==2){
+                        $this->log->debug('payment_paypal type: '.$type);
                         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['paypal_id'=>$res_arr['id']]]);
                     }
                     $pay_url = $this->order->getLinkByRel($res_arr['links'],'approve');
                     session(['payment_token' => $payment->id.','.$res_arr['id']]);
                     if($type){
+                        $this->log->debug('payment_paypal redirect ');
                         redirect($pay_url)->send();
                     }else{
+                        $this->log->debug('payment_paypal session type: '.$type);
                         throw new ApiException(['code'=>0,'msg'=>'success','data'=>['redirect'=>$pay_url]]);
                     }
                 }else{
